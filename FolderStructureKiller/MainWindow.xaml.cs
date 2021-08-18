@@ -15,7 +15,12 @@ namespace FolderStructureKiller
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
-
+            FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
+            dlg.Title = "Browse for the Specified Records folder...";
+            if (dlg.ShowDialog() == true)
+            {
+                txtRootDir.Text = dlg.FileName;
+            }
         }
 
         private void btnGo_Click(object sender, RoutedEventArgs e)
