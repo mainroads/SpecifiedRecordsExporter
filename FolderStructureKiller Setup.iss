@@ -11,12 +11,12 @@
 [Setup]
 AllowNoIcons=true
 AppId={#MyAppName}
-AppMutex={{825ED423-32F0-4CC3-A2C5-0E07ADD27C93}
+AppMutex={{007a739a-834a-4b9a-8eff-22cf8fdc90a8}
 AppName={#MyAppName}
 AppPublisher={#MyAppPublisher}
-AppPublisherURL=https://github.com/McoreD/FolderStructureKiller
-AppSupportURL=https://github.com/McoreD/FolderStructureKiller/issues
-AppUpdatesURL=https://github.com/McoreD/FolderStructureKiller/releases
+AppPublisherURL=https://github.com/McoreD/SpecifiedRecordsExporter
+AppSupportURL=https://github.com/McoreD/SpecifiedRecordsExporter/issues
+AppUpdatesURL=https://github.com/McoreD/SpecifiedRecordsExporter/releases
 AppVerName={#MyAppName} {#MyAppVersion}
 AppVersion={#MyAppVersion}
 ArchitecturesAllowed=x86 x64 ia64
@@ -53,15 +53,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: FolderStructureKillerUI\bin\Release\*.exe; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
-Source: FolderStructureKillerUI\bin\Release\*.dll; DestDir: {app}; Flags: ignoreversion
-Source: FolderStructureKillerUI\bin\Release\*.pdb; DestDir: {app}; Flags: ignoreversion
+Source: {#MyAppParentDir}*.exe; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
+Source: {#MyAppParentDir}*.dll; DestDir: {app}; Flags: ignoreversion
+Source: {#MyAppParentDir}*.pdb; DestDir: {app}; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyExeNameUI}"; Filename: "{app}\{#MyExeNameUI}.exe"
-Name: "{group}\{#MyExeNameCLI}"; Filename: "{app}\{#MyExeNameCLI}.exe"
 Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyExeNameUI}.exe"; Tasks: desktopicon
 
 [Run]
 Filename: {app}\{#MyExeNameUI}.exe; Description: {cm:LaunchProgram,{#MyAppName} UI}; Flags: nowait postinstall skipifsilent
-Filename: {app}\{#MyExeNameCLI}.exe; Description: {cm:LaunchProgram,{#MyAppName} Console}; Flags: nowait postinstall skipifsilent unchecked
