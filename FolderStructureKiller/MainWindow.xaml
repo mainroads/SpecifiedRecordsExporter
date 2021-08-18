@@ -13,8 +13,30 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         xmlns:local="clr-namespace:FolderStructureKiller"
         mc:Ignorable="d"
-        Title="Folder Structure Killer" Height="450" Width="800">
-    <StackPanel>
-        <Button x:Name="btnGo">Reorganise</Button>
-    </StackPanel>
+        Title="Folder Structure Killer" Height="450" Width="800" SizeToContent="Manual" WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="517*" />
+            <ColumnDefinition Width="170*"/>
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Browse for the Specified Records folder" Margin="10,10,10,10" Grid.ColumnSpan="2">
+            <TextBox x:Name="txtRootDir"/>
+        </GroupBox>
+        <Button Grid.Row="0" Grid.Column="2" x:Name="btnBrowse" Margin="5,5,5,5" Click="btnBrowse_Click">Browse</Button>
+
+        <GroupBox Grid.Row="1" Grid.Column="0" Name="gbFreeText" Header="Step 2 - Enter FreeText" Margin="10,10,10,10" Grid.ColumnSpan="2">
+            <TextBox x:Name="txtFreeText" materialDesign:HintAssist.Hint="C33.18 HSU High Street Upgrade"/>
+        </GroupBox>
+
+        <Button Grid.Row="3" Grid.Column="2" x:Name="btnGo" Margin="5,5,5,5" Click="btnGo_Click">Kill</Button>
+    </Grid>
 </Window>

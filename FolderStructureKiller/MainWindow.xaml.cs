@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FolderStructureKiller
 {
@@ -23,6 +11,38 @@ namespace FolderStructureKiller
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void btnBrowse_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnGo_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtFreeText.Text))
+                MessageBox.Show("Free Text is empty!");
+
+            if (Directory.Exists(txtRootDir.Text))
+            {
+                var rootDir = txtRootDir.Text;
+                var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+                foreach (var fp in files)
+                {
+                    MoveFile(rootDir, fp);
+                }
+            }
+        }
+
+        private void MoveFile(string rootDir, string origPath)
+        {
+            if (!rootDir.EndsWith(@"\"))
+                rootDir = rootDir + @"\";
+
+            string path2 = origPath.Split(rootDir)[1];
+            string fn = txtFreeText.Text + " - " + path2.Replace(@"\", " - ");
+            string destPath = Path.Combine(rootDir, fn);
+            File.Move(origPath, destPath);
         }
     }
 }
