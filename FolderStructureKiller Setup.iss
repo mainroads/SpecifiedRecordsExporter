@@ -1,6 +1,6 @@
 #define MyAppName "FolderStructureKiller"
 #define MyExeNameUI "FolderStructureKiller"
-#define MyAppParentDir "FolderStructureKiller\bin\Release\"
+#define MyAppParentDir "FolderStructureKiller\bin\Release\net6.0-windows7.0\win-x64\"
 #define MyAppPath MyAppParentDir + MyExeNameUI + ".exe"
 #dim Version[4]
 #expr ParseVersion(MyAppPath, Version[0], Version[1], Version[2], Version[3])
