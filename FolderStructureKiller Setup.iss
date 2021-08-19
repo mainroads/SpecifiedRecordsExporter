@@ -1,5 +1,5 @@
-#define MyAppName "FolderStructureKiller"
-#define MyExeNameUI "FolderStructureKiller"
+#define MyAppName "SpecifiedRecordsExporter"
+#define MyExeNameUI "SpecifiedRecordsExporter"
 #define MyAppParentDir "FolderStructureKiller\bin\Release\net6.0-windows7.0\win-x64\"
 #define MyAppPath MyAppParentDir + MyExeNameUI + ".exe"
 #dim Version[4]
@@ -11,7 +11,7 @@
 [Setup]
 AllowNoIcons=true
 AppId={#MyAppName}
-AppMutex={{007a739a-834a-4b9a-8eff-22cf8fdc90a8}
+AppMutex={{007a739a-834a-4b9a-8eff-22cf8fdc90a8}}
 AppName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL=https://github.com/McoreD/SpecifiedRecordsExporter
