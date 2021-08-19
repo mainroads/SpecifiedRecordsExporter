@@ -18,29 +18,36 @@ namespace FolderStructureKiller
         {
             FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
             dlg.Title = "Browse for the Specified Records folder...";
+            
             if (dlg.ShowDialog() == true)
             {
                 txtRootDir.Text = dlg.FileName;
             }
         }
 
-        private void btnGo_Click(object sender, RoutedEventArgs e)
+        private async btnGo_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(txtFreeText.Text))
+            {
                 MessageBox.Show("Free Text is empty!");
+            }
+            else
+            {
+                btnGo.Enabled = false;
 
-            string rootDir = txtRootDir.Text;
-            string freeText = txtFreeText.Text;
+                string rootDir = txtRootDir.Text;
+                string freeText = txtFreeText.Text;
 
-            Task.Run(() => Run(rootDir, freeText)).ContinueWith(t => { }, TaskScheduler.FromCurrentSynchronizationContext());
+                await Task.Run(() => Run(rootDir, freeText));
 
+                btnGo.Enabled = true;
+            }
         }
 
         private void Run(string rootDir, string freeText)
         {
             if (Directory.Exists(rootDir))
             {
-
                 var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
                 Parallel.ForEach(files, fp => MoveFile(rootDir, freeText, fp));
             }
