@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FolderStructureKiller
@@ -28,25 +29,32 @@ namespace FolderStructureKiller
             if (string.IsNullOrEmpty(txtFreeText.Text))
                 MessageBox.Show("Free Text is empty!");
 
-            if (Directory.Exists(txtRootDir.Text))
+            string rootDir = txtRootDir.Text;
+            string freeText = txtFreeText.Text;
+
+            Task.Run(() => Run(rootDir, freeText)).ContinueWith(t => { }, TaskScheduler.FromCurrentSynchronizationContext());
+
+        }
+
+        private void Run(string rootDir, string freeText)
+        {
+            if (Directory.Exists(rootDir))
             {
-                var rootDir = txtRootDir.Text;
+
                 var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-                foreach (var fp in files)
-                {
-                    MoveFile(rootDir, fp);
-                }
+                Parallel.ForEach(files, fp => MoveFile(rootDir, freeText, fp));
             }
         }
 
-        private void MoveFile(string rootDir, string origPath)
+        private void MoveFile(string rootDir, string freeText, string origPath)
         {
             if (!rootDir.EndsWith(@"\"))
                 rootDir = rootDir + @"\";
 
             string path2 = origPath.Split(rootDir)[1];
-            string fn = txtFreeText.Text + " - " + path2.Replace(@"\", " - ");
+            string fn = freeText + " - " + path2.Replace(@"\", " - ");
             string destPath = Path.Combine(rootDir, fn);
+
             File.Move(origPath, destPath);
         }
     }
