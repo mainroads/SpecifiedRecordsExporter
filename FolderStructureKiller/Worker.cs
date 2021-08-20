@@ -36,17 +36,14 @@ namespace SpecifiedRecordsExporter
             get { return _files.Length; }
         }
 
-        public float ProgressCurrent
-        {
-            get { return currentProgress; }
-        }
+        public string Error { get; private set; }
 
         public async Task RunAsync()
         {
             await Task.Run(() => Run());
         }
 
-        public void Run()
+        private void Run()
         {
             if (Directory.Exists(_rootDir))
             {
@@ -81,8 +78,17 @@ namespace SpecifiedRecordsExporter
                 ct.ThrowIfCancellationRequested();
             }
 
-            File.Move(origPath, destPath);
-            progress.Report(currentProgress++);
+            try
+            {
+                File.Move(origPath, destPath);
+                progress.Report(++currentProgress);
+            }
+            catch (Exception ex)
+            {
+                Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
+                progress.Report(currentProgress);
+                ct.ThrowIfCancellationRequested();
+            }
         }
 
         private void OnProgressChanged(float progress)

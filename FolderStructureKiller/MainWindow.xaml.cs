@@ -8,7 +8,7 @@ namespace SpecifiedRecordsExporter
     /// </summary>
     public partial class MainWindow : Window
     {
-        Worker worker;
+        Worker _worker;
 
         public MainWindow()
         {
@@ -37,11 +37,11 @@ namespace SpecifiedRecordsExporter
                 pBar.Value = 0;
                 btnGo.IsEnabled = false;
 
-                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                pBar.Maximum = worker.ProgressTotal;
+                _worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                pBar.Maximum = _worker.ProgressTotal;
 
-                worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
-                await worker.RunAsync();
+                _worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
+                await _worker.RunAsync();
 
                 btnGo.IsEnabled = true;
             }
@@ -49,7 +49,11 @@ namespace SpecifiedRecordsExporter
 
         private void Worker_FileMoveProgressChanged(float progress)
         {
-            pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = worker.ProgressCurrent; }));
+            if (!string.IsNullOrEmpty(_worker.Error))
+            {
+                tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = _worker.Error; }));
+            }
+            pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
         }
     }
 }
