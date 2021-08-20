@@ -8,11 +8,19 @@
     <UseWindowsForms>False</UseWindowsForms>
     <AssemblyVersion>1.1</AssemblyVersion>
     <FileVersion>1.1</FileVersion>
+    <ApplicationIcon>\\Mac\Home\Projects\McoreD\FolderStructureKiller\FolderStructureKiller\FolderBlast.ico</ApplicationIcon>
+    <PackageIcon>FolderBlast.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FolderBrowserForWPF" Version="1.2.0" />
     <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="FolderBlast.png">
+      <Pack>True</Pack>
+    </None>
   </ItemGroup>
 
 </Project>
