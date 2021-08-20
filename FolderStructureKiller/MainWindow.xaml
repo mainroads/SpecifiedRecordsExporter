@@ -37,6 +37,7 @@
         </GroupBox>
 
         <GroupBox Grid.Row="2" Grid.Column="0"  Header="Step 3 - Export and use Sigma Imports" Margin="10,10,10,10" Grid.ColumnSpan="2">
+            <ProgressBar x:Name="pBar"></ProgressBar>
         </GroupBox>
         <Button Grid.Row="3" Grid.Column="2" x:Name="btnGo" Margin="5,5,5,5" Click="btnGo_Click">Export</Button>
     </Grid>

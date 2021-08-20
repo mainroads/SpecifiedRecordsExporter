@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace SpecifiedRecordsExporter
 {
@@ -8,6 +7,7 @@ namespace SpecifiedRecordsExporter
     /// </summary>
     public partial class MainWindow : Window
     {
+        Worker worker;
 
         public MainWindow()
         {
@@ -35,16 +35,19 @@ namespace SpecifiedRecordsExporter
             {
                 btnGo.IsEnabled = false;
 
-                string rootDir = txtRootDir.Text;
-                string freeText = txtFreeText.Text;
+                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                pBar.Maximum = worker.ProgressTotal;
 
-                Worker worker = new Worker();
-                await Task.Run(() => worker.Run(rootDir, freeText));
+                worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
+                await worker.RunAsync();
 
                 btnGo.IsEnabled = true;
             }
         }
 
-
+        private void Worker_FileMoveProgressChanged(float progress)
+        {
+            pBar.Value = worker.ProgressCurrent;
+        }
     }
 }
