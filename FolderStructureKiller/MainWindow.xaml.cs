@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 
 namespace SpecifiedRecordsExporter
 {
@@ -49,13 +48,16 @@ namespace SpecifiedRecordsExporter
         {
             if (!string.IsNullOrEmpty(worker.Error))
             {
-                tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = worker.Error; }));
+                tbError.Text = worker.Error;
+                // tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = worker.Error; }));
             }
             if (worker.ProgressTotal > 0)
             {
-                pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = worker.ProgressTotal; }));
+                pBar.Maximum = worker.ProgressTotal;
+                // pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = worker.ProgressTotal; }));
             }
-            pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
+            pBar.Value = progress;
+            // pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
         }
     }
 }
