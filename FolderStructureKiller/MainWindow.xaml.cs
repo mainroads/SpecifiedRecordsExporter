@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace SpecifiedRecordsExporter
 {
@@ -33,6 +34,7 @@ namespace SpecifiedRecordsExporter
             }
             else
             {
+                pBar.Value = 0;
                 btnGo.IsEnabled = false;
 
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
@@ -47,7 +49,7 @@ namespace SpecifiedRecordsExporter
 
         private void Worker_FileMoveProgressChanged(float progress)
         {
-            pBar.Value = worker.ProgressCurrent;
+            pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = worker.ProgressCurrent; }));
         }
     }
 }

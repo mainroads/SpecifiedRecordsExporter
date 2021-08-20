@@ -50,7 +50,12 @@ namespace SpecifiedRecordsExporter
         {
             if (Directory.Exists(_rootDir))
             {
-                Parallel.ForEach(_files, fp => MoveFile(fp));
+                Progress<float> progress = new Progress<float>(OnProgressChanged);
+
+                foreach (string fp in _files)
+                {
+                    MoveFile(fp, progress);
+                }
             }
         }
 
@@ -62,23 +67,15 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private async void MoveFile(string origPath)
+        private async void MoveFile(string origPath, IProgress<float> progress)
         {
             string path2 = origPath.Split(_rootDir)[1];
             string fn = _freeText + " - " + path2.Replace(@"\", " - ");
             string destPath = Path.Combine(_rootDir, fn);
 
-            Progress<float> progress = new Progress<float>(OnProgressChanged);
             cts = new CancellationTokenSource();
-            await Task.Run(() =>
-            {
-                MoveFileThread(origPath, destPath, progress, cts.Token);
-            });
+            CancellationToken ct = cts.Token;
 
-        }
-
-        private void MoveFileThread(string origPath, string destPath, IProgress<float> progress, CancellationToken ct)
-        {
             if (ct.IsCancellationRequested)
             {
                 ct.ThrowIfCancellationRequested();
