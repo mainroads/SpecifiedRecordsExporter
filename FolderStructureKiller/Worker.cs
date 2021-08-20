@@ -1,85 +1,48 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SpecifiedRecordsExporter
 {
     public class Worker
     {
-        string _rootDir;
-        string _freeText;
+        public delegate void ProgressChangedEventHandler(float progress);
+        public event ProgressChangedEventHandler FileMoveProgressChanged;
 
-        string[] _files;
-        float currentProgress;
+        public float ProgressTotal
+        {
+            get
+            {
+                return files.Length;
+            }
+        }
 
-        public delegate void ProgressChanged(float progress);
-        public event ProgressChanged FileMoveProgressChanged;
-        private CancellationTokenSource cts;
+        public string Error { get; private set; }
+
+        private TaskEx<float> task;
+        private string rootDir;
+        private string freeText;
+        private string[] files;
+        private float currentProgress;
 
         public Worker(string rootDir, string freeText)
         {
+            task = new TaskEx<float>();
+            task.ProgressChanged += OnProgressChanged;
+
             if (Directory.Exists(rootDir))
             {
                 if (!rootDir.EndsWith(@"\"))
                     rootDir = rootDir + @"\";
 
-                _rootDir = rootDir;
-                _freeText = freeText;
+                this.rootDir = rootDir;
+                this.freeText = freeText;
             }
         }
 
-        public float ProgressTotal
+        public async Task Run()
         {
-            get { return _files.Length; }
-        }
-
-        public string Error { get; private set; }
-
-        public async Task RunAsync()
-        {
-            await Task.Run(() => Run());
-        }
-
-        private void Run()
-        {
-            if (Directory.Exists(_rootDir))
-            {
-                _files = Directory.GetFiles(_rootDir, "*.*", SearchOption.AllDirectories);
-                Progress<float> progress = new Progress<float>(OnProgressChanged);
-
-                foreach (string fp in _files)
-                {
-                    MoveFile(fp, progress);
-                }
-            }
-        }
-
-        private void MoveFile(string origPath, IProgress<float> progress)
-        {
-            string path2 = origPath.Split(_rootDir)[1];
-            string fn = _freeText + " - " + path2.Replace(@"\", " - ");
-            string destPath = Path.Combine(_rootDir, fn);
-
-            cts = new CancellationTokenSource();
-            CancellationToken ct = cts.Token;
-
-            if (ct.IsCancellationRequested)
-            {
-                ct.ThrowIfCancellationRequested();
-            }
-
-            try
-            {
-                File.Move(origPath, destPath);
-                progress.Report(++currentProgress);
-            }
-            catch (Exception ex)
-            {
-                Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
-                progress.Report(currentProgress);
-                ct.ThrowIfCancellationRequested();
-            }
+            await task.Run(Work);
         }
 
         private void OnProgressChanged(float progress)
@@ -89,9 +52,41 @@ namespace SpecifiedRecordsExporter
 
         public void Stop()
         {
-            if (cts != null)
+            task.Cancel();
+        }
+
+        private void Work()
+        {
+            if (Directory.Exists(rootDir))
             {
-                cts.Cancel();
+                files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+
+                foreach (string fp in files)
+                {
+                    MoveFile(fp);
+
+                    task.ThrowIfCancellationRequested();
+                }
+            }
+        }
+
+        private void MoveFile(string origPath)
+        {
+            string path2 = origPath.Split(rootDir)[1];
+            string fn = freeText + " - " + path2.Replace(@"\", " - ");
+            string destPath = Path.Combine(rootDir, fn);
+
+            try
+            {
+                File.Move(origPath, destPath);
+
+                task.Report(++currentProgress);
+            }
+            catch (Exception ex)
+            {
+                Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
+
+                task.Report(currentProgress);
             }
         }
     }

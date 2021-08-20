@@ -8,7 +8,7 @@ namespace SpecifiedRecordsExporter
     /// </summary>
     public partial class MainWindow : Window
     {
-        Worker _worker;
+        private Worker worker;
 
         public MainWindow()
         {
@@ -37,9 +37,9 @@ namespace SpecifiedRecordsExporter
                 pBar.Value = 0;
                 btnGo.IsEnabled = false;
 
-                _worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                _worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
-                await _worker.RunAsync();
+                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
+                await worker.Run();
 
                 btnGo.IsEnabled = true;
             }
@@ -47,13 +47,13 @@ namespace SpecifiedRecordsExporter
 
         private void Worker_FileMoveProgressChanged(float progress)
         {
-            if (!string.IsNullOrEmpty(_worker.Error))
+            if (!string.IsNullOrEmpty(worker.Error))
             {
-                tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = _worker.Error; }));
+                tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = worker.Error; }));
             }
-            if (_worker.ProgressTotal > 0)
+            if (worker.ProgressTotal > 0)
             {
-                pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = _worker.ProgressTotal; }));
+                pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = worker.ProgressTotal; }));
             }
             pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
         }
