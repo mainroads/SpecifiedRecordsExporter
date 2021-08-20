@@ -38,8 +38,6 @@ namespace SpecifiedRecordsExporter
                 btnGo.IsEnabled = false;
 
                 _worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                pBar.Maximum = _worker.ProgressTotal;
-
                 _worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
                 await _worker.RunAsync();
 
@@ -52,6 +50,10 @@ namespace SpecifiedRecordsExporter
             if (!string.IsNullOrEmpty(_worker.Error))
             {
                 tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = _worker.Error; }));
+            }
+            if (_worker.ProgressTotal > 0)
+            {
+                pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = _worker.ProgressTotal; }));
             }
             pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
         }

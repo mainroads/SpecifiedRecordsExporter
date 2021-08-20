@@ -26,8 +26,6 @@ namespace SpecifiedRecordsExporter
 
                 _rootDir = rootDir;
                 _freeText = freeText;
-
-                _files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
             }
         }
 
@@ -47,6 +45,7 @@ namespace SpecifiedRecordsExporter
         {
             if (Directory.Exists(_rootDir))
             {
+                _files = Directory.GetFiles(_rootDir, "*.*", SearchOption.AllDirectories);
                 Progress<float> progress = new Progress<float>(OnProgressChanged);
 
                 foreach (string fp in _files)
@@ -56,15 +55,7 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        public void Stop()
-        {
-            if (cts != null)
-            {
-                cts.Cancel();
-            }
-        }
-
-        private async void MoveFile(string origPath, IProgress<float> progress)
+        private void MoveFile(string origPath, IProgress<float> progress)
         {
             string path2 = origPath.Split(_rootDir)[1];
             string fn = _freeText + " - " + path2.Replace(@"\", " - ");
@@ -94,6 +85,14 @@ namespace SpecifiedRecordsExporter
         private void OnProgressChanged(float progress)
         {
             FileMoveProgressChanged?.Invoke(progress);
+        }
+
+        public void Stop()
+        {
+            if (cts != null)
+            {
+                cts.Cancel();
+            }
         }
     }
 }
