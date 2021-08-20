@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace FolderStructureKiller
+namespace SpecifiedRecordsExporter
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
