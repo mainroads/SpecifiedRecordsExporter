@@ -18,14 +18,14 @@ namespace FolderStructureKiller
         {
             FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
             dlg.Title = "Browse for the Specified Records folder...";
-            
+
             if (dlg.ShowDialog() == true)
             {
                 txtRootDir.Text = dlg.FileName;
             }
         }
 
-        private async btnGo_Click(object sender, RoutedEventArgs e)
+        private async void btnGo_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(txtFreeText.Text))
             {
@@ -33,14 +33,14 @@ namespace FolderStructureKiller
             }
             else
             {
-                btnGo.Enabled = false;
+                btnGo.IsEnabled = false;
 
                 string rootDir = txtRootDir.Text;
                 string freeText = txtFreeText.Text;
 
                 await Task.Run(() => Run(rootDir, freeText));
 
-                btnGo.Enabled = true;
+                btnGo.IsEnabled = true;
             }
         }
 
