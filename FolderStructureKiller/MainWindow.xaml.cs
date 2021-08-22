@@ -2,9 +2,6 @@
 
 namespace SpecifiedRecordsExporter
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private Worker worker;
@@ -33,8 +30,8 @@ namespace SpecifiedRecordsExporter
             }
             else
             {
-                pBar.Value = 0;
                 btnGo.IsEnabled = false;
+                pBar.Value = 0;
 
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
                 worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
@@ -49,15 +46,14 @@ namespace SpecifiedRecordsExporter
             if (!string.IsNullOrEmpty(worker.Error))
             {
                 tbError.Text = worker.Error;
-                // tbError.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { tbError.Text = worker.Error; }));
             }
-            if (worker.ProgressTotal > 0)
+
+            if (worker.FilesCount > 0)
             {
-                pBar.Maximum = worker.ProgressTotal;
-                // pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Maximum = worker.ProgressTotal; }));
+                pBar.Maximum = worker.FilesCount;
             }
+
             pBar.Value = progress;
-            // pBar.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => { pBar.Value = progress; }));
         }
     }
 }

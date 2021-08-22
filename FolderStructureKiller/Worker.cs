@@ -9,21 +9,13 @@ namespace SpecifiedRecordsExporter
         public delegate void ProgressChangedEventHandler(float progress);
         public event ProgressChangedEventHandler FileMoveProgressChanged;
 
-        public float ProgressTotal
-        {
-            get
-            {
-                return files.Length;
-            }
-        }
-
+        public int FilesCount { get; private set; }
+        public int MovedFilesCount { get; private set; }
         public string Error { get; private set; }
 
         private TaskEx<float> task;
         private string rootDir;
         private string freeText;
-        private string[] files;
-        private float currentProgress;
 
         public Worker(string rootDir, string freeText)
         {
@@ -33,7 +25,9 @@ namespace SpecifiedRecordsExporter
             if (Directory.Exists(rootDir))
             {
                 if (!rootDir.EndsWith(@"\"))
-                    rootDir = rootDir + @"\";
+                {
+                    rootDir += @"\";
+                }
 
                 this.rootDir = rootDir;
                 this.freeText = freeText;
@@ -57,20 +51,27 @@ namespace SpecifiedRecordsExporter
 
         private void Work()
         {
+            MovedFilesCount = 0;
+
             if (Directory.Exists(rootDir))
             {
-                files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+                string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+                FilesCount = files.Length;
 
                 foreach (string fp in files)
                 {
-                    MoveFile(fp);
+                    if (MoveFile(fp))
+                    {
+                        MovedFilesCount++;
+                        task.Report(MovedFilesCount);
+                    }
 
                     task.ThrowIfCancellationRequested();
                 }
             }
         }
 
-        private void MoveFile(string origPath)
+        private bool MoveFile(string origPath)
         {
             string path2 = origPath.Split(rootDir)[1];
             string fn = freeText + " - " + path2.Replace(@"\", " - ");
@@ -78,16 +79,18 @@ namespace SpecifiedRecordsExporter
 
             try
             {
-                File.Move(origPath, destPath);
-
-                task.Report(++currentProgress);
+                if (destPath.Length < 260)
+                {
+                    File.Move(origPath, destPath);
+                    return true;
+                }
             }
             catch (Exception ex)
             {
                 Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
-
-                task.Report(currentProgress);
             }
+
+            return false;
         }
     }
 }
