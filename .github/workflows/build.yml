@@ -15,6 +15,7 @@ jobs:
         configuration:
           - Debug
           - Release
+      fail-fast: false
     
     runs-on: windows-latest
     
