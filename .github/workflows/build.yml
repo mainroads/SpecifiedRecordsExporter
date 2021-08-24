@@ -2,7 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+    tags: 
+      - v*.*.*
 
 jobs:
   build:
