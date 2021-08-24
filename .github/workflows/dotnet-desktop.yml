@@ -87,7 +87,7 @@ jobs:
 
     - name: Build the installer
       run: |
-        "iscc.exe" "SpecifiedRecordsExporter.iss"
+        "%programfiles(x86)%\Inno Setup 6\iscc.exe" "SpecifiedRecordsExporter.iss"
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-artifact
     - name: Upload build artifacts
