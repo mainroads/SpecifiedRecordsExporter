@@ -45,3 +45,13 @@ jobs:
         with:
           name: Setup
           path: 'Output\*-setup.exe'
+        
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          prerelease: true
+          files: 'Output\*-setup.exe'
+          fail_on_unmatched_files: true
+        
