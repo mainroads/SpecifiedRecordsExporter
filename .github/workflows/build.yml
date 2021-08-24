@@ -12,7 +12,9 @@ jobs:
     
     strategy:
       matrix:
-        configuration: [ Debug, Release ]
+        configuration:
+          - Debug
+          - Release
     
     runs-on: windows-latest
     
