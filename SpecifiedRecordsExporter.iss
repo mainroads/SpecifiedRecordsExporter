@@ -7,7 +7,6 @@
 #define MyAppVersion Str(Version[0]) + "." + Str(Version[1]) + "." + Str(Version[2])
 #define MyAppPublisher "ShareX Developers"
 
-
 [Setup]
 AllowNoIcons=true
 AppId={#MyAppName}
