@@ -37,7 +37,7 @@ jobs:
         run: dotnet restore
         
       - name: Build
-        run: dotnet publish -c ${{ matrix.configuration }} --no-restore --self-contained -r win-x64
+        run: dotnet publish -c ${{ matrix.configuration }} --self-contained -r win-x64
         
       - name: Test
         run: dotnet test --no-restore --verbosity normal
