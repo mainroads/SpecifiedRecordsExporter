@@ -68,6 +68,12 @@ namespace SpecifiedRecordsExporter
 
                     task.ThrowIfCancellationRequested();
                 }
+
+                string[] dirs = Directory.GetDirectories(rootDir);
+                foreach (string dir in dirs)
+                {
+                    DeleteEmptyFolders(dir);
+                }
             }
         }
 
@@ -91,6 +97,19 @@ namespace SpecifiedRecordsExporter
             }
 
             return false;
+        }
+
+        private void DeleteEmptyFolders(string dirPath)
+        {
+            foreach (string subdirPath in Directory.GetDirectories(dirPath))
+            {
+                DeleteEmptyFolders(subdirPath);
+            }
+
+            if (EmptyFolderHelper.CheckDirectoryEmpty(dirPath))
+            {
+                new DirectoryInfo(dirPath).Delete();
+            }
         }
     }
 }

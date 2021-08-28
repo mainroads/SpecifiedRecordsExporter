@@ -20,6 +20,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -27,16 +28,20 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Browse for the Specified Records folder" Margin="10,10,10,10" Grid.ColumnSpan="2">
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Copy Specified Records subfolder (e.g. 'Pavement Condition Performance Criteria' to Downloads folder" Margin="10,10,10,10" Grid.ColumnSpan="2">
+            <CheckBox>I have copied the relevant Specified Records subfolder to my Downloads folder</CheckBox>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Step 2 - Browse for the Specified Records subfolder" Margin="10,10,10,10" Grid.ColumnSpan="2">
             <TextBox x:Name="txtRootDir"/>
         </GroupBox>
-        <Button Grid.Row="0" Grid.Column="2" x:Name="btnBrowse" Margin="5,5,10,5" Click="btnBrowse_Click">Browse...</Button>
+        <Button Grid.Row="1" Grid.Column="2" x:Name="btnBrowse" Margin="5,5,10,5" Click="btnBrowse_Click">Browse...</Button>
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Step 2 - Enter Free Text" Margin="10,10,10,10" Grid.ColumnSpan="2">
+        <GroupBox Grid.Row="2" Grid.Column="0" Header="Step 3 - Enter Free Text" Margin="10,10,10,10" Grid.ColumnSpan="2">
             <TextBox x:Name="txtFreeText" materialDesign:HintAssist.Hint="C33.18 HSU High Street Upgrade"/>
         </GroupBox>
 
-        <GroupBox Grid.Row="2" Grid.Column="0"  Header="Step 3 - Export and use Sigma Imports" Margin="10,10,10,10" Grid.ColumnSpan="2">
+        <GroupBox Grid.Row="3" Grid.Column="0"  Header="Step 4 - Export and use Sigma Imports" Margin="10,10,10,10" Grid.ColumnSpan="2">
             <StackPanel Orientation="Vertical">
                 <ProgressBar x:Name="pBar"></ProgressBar>
                 <TextBlock x:Name="tbError" Margin="0,10,0,0" TextWrapping="Wrap"></TextBlock>

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 
 namespace SpecifiedRecordsExporter
 {
@@ -18,7 +19,15 @@ namespace SpecifiedRecordsExporter
 
             if (dlg.ShowDialog() == true)
             {
-                txtRootDir.Text = dlg.FileName;
+                string dir = dlg.FileName;
+                if (Directory.GetParent(dir).Name == "Downloads")
+                {
+                    txtRootDir.Text = dlg.FileName;
+                }
+                else
+                {
+                    MessageBox.Show("Specified Records subfolder is not in your Downloads folder!", Application.Current.MainWindow.Name);
+                }
             }
         }
 
@@ -26,7 +35,7 @@ namespace SpecifiedRecordsExporter
         {
             if (string.IsNullOrEmpty(txtFreeText.Text))
             {
-                MessageBox.Show("Free Text is empty!");
+                MessageBox.Show("Free Text is empty!", Application.Current.MainWindow.Name);
             }
             else
             {
