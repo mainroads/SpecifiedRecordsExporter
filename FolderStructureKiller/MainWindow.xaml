@@ -15,7 +15,7 @@
         mc:Ignorable="d"
         Title="Specified Records Exporter" Height="450" Width="800" SizeToContent="Manual" WindowStartupLocation="CenterScreen">
 
-    <Grid>
+    <Grid MinWidth="800" MinHeight="400">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -29,7 +29,7 @@
         </Grid.ColumnDefinitions>
 
         <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Copy Specified Records subfolder (e.g. 'Pavement Condition Performance Criteria' to Downloads folder" Margin="10,10,10,10" Grid.ColumnSpan="2">
-            <CheckBox>I have copied the relevant Specified Records subfolder to my Downloads folder</CheckBox>
+            <CheckBox x:Name="chkCopyFiles">I have copied the relevant Specified Records subfolder to my Downloads folder</CheckBox>
         </GroupBox>
 
         <GroupBox Grid.Row="1" Grid.Column="0" Header="Step 2 - Browse for the Specified Records subfolder" Margin="10,10,10,10" Grid.ColumnSpan="2">
