@@ -45,7 +45,7 @@ namespace SpecifiedRecordsExporter
             {
                 MessageBox.Show("Free Text is empty!", Application.Current.MainWindow.Title);
             }
-            else if (chkCopyFiles.IsChecked == true)
+            else if (chkCopyFiles.IsChecked == false)
             {
                 MessageBox.Show("You have not completed Step 1 above!", Application.Current.MainWindow.Title);
             }
