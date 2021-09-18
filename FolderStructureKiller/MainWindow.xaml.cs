@@ -39,6 +39,15 @@ namespace SpecifiedRecordsExporter
 
         }
 
+        private void btnPreview_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(txtRootDir.Text))
+            {
+                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+
+
+            }
+        }
         private async void btnGo_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(txtFreeText.Text))
@@ -55,8 +64,8 @@ namespace SpecifiedRecordsExporter
                 pBar.Value = 0;
 
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                worker.FileMoveProgressChanged += Worker_FileMoveProgressChanged;
-                await worker.Run();
+                worker.FileProgressChanged += Worker_FileMoveProgressChanged;
+                await worker.RenameAsync();
 
                 btnGo.IsEnabled = true;
             }
@@ -76,5 +85,7 @@ namespace SpecifiedRecordsExporter
 
             pBar.Value = progress;
         }
+
+
     }
 }

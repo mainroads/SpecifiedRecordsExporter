@@ -7,7 +7,7 @@ namespace SpecifiedRecordsExporter
     public class Worker
     {
         public delegate void ProgressChangedEventHandler(float progress);
-        public event ProgressChangedEventHandler FileMoveProgressChanged;
+        public event ProgressChangedEventHandler FileProgressChanged;
 
         public int FilesCount { get; private set; }
         public int MovedFilesCount { get; private set; }
@@ -34,14 +34,19 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        public async Task Run()
+        public async Task PreviewAsync()
         {
-            await task.Run(Work);
+            await task.Run(Preview);
+        }
+
+        public async Task RenameAsync()
+        {
+            await task.Run(Rename);
         }
 
         private void OnProgressChanged(float progress)
         {
-            FileMoveProgressChanged?.Invoke(progress);
+            FileProgressChanged?.Invoke(progress);
         }
 
         public void Stop()
@@ -49,7 +54,26 @@ namespace SpecifiedRecordsExporter
             task.Cancel();
         }
 
-        private void Work()
+        private string GetDestPath(string origPath)
+        {
+            string path2 = origPath.Split(rootDir)[1];
+            string fn = freeText + " - " + path2.Replace(@"\", " - ");
+            return Path.Combine(rootDir, fn);
+        }
+
+        private void Preview()
+        {
+            if (Directory.Exists(rootDir))
+            {
+                string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+                foreach (string fp in files)
+                {
+                    // task.Report(fp);
+                }
+            }
+        }
+
+        private void Rename()
         {
             MovedFilesCount = 0;
 
@@ -77,11 +101,11 @@ namespace SpecifiedRecordsExporter
             }
         }
 
+
+
         private bool MoveFile(string origPath)
         {
-            string path2 = origPath.Split(rootDir)[1];
-            string fn = freeText + " - " + path2.Replace(@"\", " - ");
-            string destPath = Path.Combine(rootDir, fn);
+            string destPath = GetDestPath(origPath);
 
             try
             {
