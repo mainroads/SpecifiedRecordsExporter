@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace SpecifiedRecordsExporter
 {
@@ -39,15 +41,25 @@ namespace SpecifiedRecordsExporter
 
         }
 
-        private void btnPreview_Click(object sender, RoutedEventArgs e)
+        private async void btnPreview_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(txtRootDir.Text))
             {
+                lvFiles.Items.Clear();
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-
-
+                worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
+                await worker.PreviewAsync();
             }
         }
+
+        private void Worker_PreviewProgressChanged(string progress)
+        {
+            ListViewItem lvi = new ListViewItem();
+            lvi.Foreground = progress.Length > 260 ? new SolidColorBrush(Colors.Yellow) : new SolidColorBrush(Colors.Green);
+            lvi.Content = progress;
+            lvFiles.Items.Add(lvi);
+        }
+
         private async void btnGo_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(txtFreeText.Text))
@@ -58,13 +70,17 @@ namespace SpecifiedRecordsExporter
             {
                 MessageBox.Show("You have not completed Step 1 above!", Application.Current.MainWindow.Title);
             }
+            else if (lvFiles.Items.Count == 0)
+            {
+                MessageBox.Show("Please press the Preview button before trying to rename.", Application.Current.MainWindow.Title);
+            }
             else
             {
                 btnGo.IsEnabled = false;
                 pBar.Value = 0;
 
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                worker.FileProgressChanged += Worker_FileMoveProgressChanged;
+                worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
                 await worker.RenameAsync();
 
                 btnGo.IsEnabled = true;

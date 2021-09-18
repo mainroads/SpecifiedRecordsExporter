@@ -6,21 +6,30 @@ namespace SpecifiedRecordsExporter
 {
     public class Worker
     {
-        public delegate void ProgressChangedEventHandler(float progress);
-        public event ProgressChangedEventHandler FileProgressChanged;
+        public delegate void RenameProgressChangedEventHandler(float progress);
+        public event RenameProgressChangedEventHandler RenameProgressChanged;
+
+        public delegate void PreviewProgressChangedEventHandler(string progress);
+        public event PreviewProgressChangedEventHandler PreviewProgressChanged;
 
         public int FilesCount { get; private set; }
         public int MovedFilesCount { get; private set; }
         public string Error { get; private set; }
 
-        private TaskEx<float> task;
+        private TaskEx<float> taskRename;
+        private TaskEx<string> taskPreview;
+
         private string rootDir;
         private string freeText;
 
         public Worker(string rootDir, string freeText)
         {
-            task = new TaskEx<float>();
-            task.ProgressChanged += OnProgressChanged;
+            taskPreview = new TaskEx<string>();
+            taskPreview.ProgressChanged += OnPreviewProgressChanged;
+
+            taskRename = new TaskEx<float>();
+            taskRename.ProgressChanged += OnRenameProgressChanged;
+
 
             if (Directory.Exists(rootDir))
             {
@@ -34,24 +43,29 @@ namespace SpecifiedRecordsExporter
             }
         }
 
+        private void OnPreviewProgressChanged(string progress)
+        {
+            PreviewProgressChanged?.Invoke(progress);
+        }
+
         public async Task PreviewAsync()
         {
-            await task.Run(Preview);
+            await taskPreview.Run(Preview);
         }
 
         public async Task RenameAsync()
         {
-            await task.Run(Rename);
+            await taskRename.Run(Rename);
         }
 
-        private void OnProgressChanged(float progress)
+        private void OnRenameProgressChanged(float progress)
         {
-            FileProgressChanged?.Invoke(progress);
+            RenameProgressChanged?.Invoke(progress);
         }
 
         public void Stop()
         {
-            task.Cancel();
+            taskRename.Cancel();
         }
 
         private string GetDestPath(string origPath)
@@ -68,7 +82,8 @@ namespace SpecifiedRecordsExporter
                 string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
                 foreach (string fp in files)
                 {
-                    // task.Report(fp);
+                    taskPreview.Report(GetDestPath(fp));
+                    taskPreview.ThrowIfCancellationRequested();
                 }
             }
         }
@@ -87,10 +102,10 @@ namespace SpecifiedRecordsExporter
                     if (MoveFile(fp))
                     {
                         MovedFilesCount++;
-                        task.Report(MovedFilesCount);
+                        taskRename.Report(MovedFilesCount);
                     }
 
-                    task.ThrowIfCancellationRequested();
+                    taskRename.ThrowIfCancellationRequested();
                 }
 
                 string[] dirs = Directory.GetDirectories(rootDir);
