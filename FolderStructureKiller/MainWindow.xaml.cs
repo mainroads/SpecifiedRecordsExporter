@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using ShareX.HelpersLib;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -27,6 +28,7 @@ namespace SpecifiedRecordsExporter
                     if (Directory.GetParent(dir).Name == "Downloads")
                     {
                         txtRootDir.Text = dlg.FileName;
+                        btnPreview.IsEnabled = true;
                     }
                     else
                     {
@@ -58,6 +60,7 @@ namespace SpecifiedRecordsExporter
             lvi.Foreground = progress.Length > 260 ? new SolidColorBrush(Colors.Yellow) : new SolidColorBrush(Colors.Green);
             lvi.Content = progress;
             lvFiles.Items.Add(lvi);
+            btnGo.IsEnabled = lvFiles.Items.Count > 0;
         }
 
         private async void btnGo_Click(object sender, RoutedEventArgs e)
@@ -91,17 +94,29 @@ namespace SpecifiedRecordsExporter
         {
             if (!string.IsNullOrEmpty(worker.Error))
             {
-                tbError.Text = worker.Error;
+                tbStatus.Text = worker.Error;
             }
 
             if (worker.FilesCount > 0)
             {
                 pBar.Maximum = worker.FilesCount;
+                tbStatus.Text = "Export complete!";
             }
 
             pBar.Value = progress;
         }
 
-
+        private void lvFiles_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            string fp = lvFiles.SelectedItem.ToString();
+            if (!string.IsNullOrEmpty(fp))
+            {
+                string dir = Path.GetDirectoryName(fp);
+                if (Directory.Exists(dir))
+                {
+                    Helpers.OpenFolder(dir);
+                }
+            }
+        }
     }
 }
