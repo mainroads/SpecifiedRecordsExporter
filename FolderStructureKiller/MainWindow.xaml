@@ -42,7 +42,7 @@
         </GroupBox>
 
         <GroupBox Grid.Row="3" Grid.Column="0" Header="Step 3 - Press Preview" Margin="2,10,10,10">
-            <ListView x:Name="lvFiles" MouseDoubleClick="lvFiles_MouseDoubleClick"/>
+            <ListView x:Name="lvFiles" MouseDoubleClick="lvFiles_MouseDoubleClick" MaxHeight="600"/>
         </GroupBox>
         <Button Grid.Row="3" Grid.Column="2" x:Name="btnPreview" Margin="5,20,10,20" Click="btnPreview_Click" IsEnabled="False">Preview</Button>
 
