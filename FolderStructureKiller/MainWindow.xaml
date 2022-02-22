@@ -15,7 +15,8 @@
         mc:Ignorable="d"
         Title="Specified Records Exporter" SizeToContent="Manual" WindowStartupLocation="CenterScreen" WindowState="Maximized">
 
-    <Grid>
+    <ScrollViewer>
+     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -28,11 +29,11 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Copy Specified Records subfolder (e.g. 'Pavement Condition Performance Criteria' to Downloads folder" Margin="2,10,10,10" >
-            <CheckBox x:Name="chkCopyFiles">I have copied the relevant Specified Records subfolder to my Downloads folder</CheckBox>
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Step 1 - Copy Specified Records subfolder(s) into the Specified Records folder in your Downloads folder" Margin="2,10,10,10" >
+            <CheckBox x:Name="chkCopyFiles">I have copied the relevant Specified Records subfolder(s) to my Downloads folder</CheckBox>
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Step 2 - Browse for the Specified Records subfolder" Margin="2,10,10,10">
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Step 2 - Browse for the Specified Records folder in Downloads" Margin="2,10,10,10">
             <TextBox x:Name="txtRootDir"/>
         </GroupBox>
         <Button Grid.Row="1" Grid.Column="2" x:Name="btnBrowse" Margin="5,30,10,31" Click="btnBrowse_Click">Browse...</Button>
@@ -53,5 +54,6 @@
             </StackPanel>
         </GroupBox>
         <Button Grid.Row="4" Grid.Column="2" x:Name="btnGo" Margin="5,33,10,34" Click="btnGo_Click" IsEnabled="False">Export</Button>
-    </Grid>
+    </Grid>       
+    </ScrollViewer>
 </Window>
