@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ShareX.HelpersLib;
+using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SpecifiedRecordsExporter
@@ -39,7 +41,7 @@ namespace SpecifiedRecordsExporter
                 }
 
                 this.rootDir = rootDir;
-                this.freeText = freeText;
+                this.freeText = freeText.Trim();
             }
         }
 
@@ -94,6 +96,30 @@ namespace SpecifiedRecordsExporter
 
             if (Directory.Exists(rootDir))
             {
+                string[] zipFiles = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories);
+                foreach (string fpZipFile in zipFiles)
+                {
+                    string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
+                    ZipManager.Extract(fpZipFile, zipDir);
+                    string[] cadFiles = Directory.GetFiles(Path.GetDirectoryName(zipDir), "*.dwg", SearchOption.AllDirectories);
+                    if (cadFiles.Length > 0)
+                    {
+                        Directory.Delete(zipDir, true);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            File.Delete(fpZipFile);
+                        }
+                        catch
+                        {
+                            Thread.Sleep(5000);
+                            File.Delete(fpZipFile);
+                        }
+                    }
+                }
+
                 string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
                 FilesCount = files.Length;
 
@@ -115,8 +141,6 @@ namespace SpecifiedRecordsExporter
                 }
             }
         }
-
-
 
         private bool MoveFile(string origPath)
         {

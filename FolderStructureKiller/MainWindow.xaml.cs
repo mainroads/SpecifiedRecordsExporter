@@ -1,5 +1,6 @@
 ﻿using ShareX.HelpersLib;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,6 +14,7 @@ namespace SpecifiedRecordsExporter
         public MainWindow()
         {
             InitializeComponent();
+            Title = $"{Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         }
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
@@ -100,7 +102,7 @@ namespace SpecifiedRecordsExporter
             if (worker.FilesCount > 0)
             {
                 pBar.Maximum = worker.FilesCount;
-                tbStatus.Text = "Export complete!";
+                tbStatus.Text = "Rename complete!";
             }
 
             pBar.Value = progress;

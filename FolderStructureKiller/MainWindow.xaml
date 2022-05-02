@@ -47,13 +47,13 @@
         </GroupBox>
         <Button Grid.Row="3" Grid.Column="2" x:Name="btnPreview" Margin="5,20,10,20" Click="btnPreview_Click" IsEnabled="False">Preview</Button>
 
-        <GroupBox Grid.Row="4" Grid.Column="0"  Header="Step 4 - Export and use Sigma Imports" Margin="2,10,10,10" >
+        <GroupBox Grid.Row="4" Grid.Column="0"  Header="Step 4 - Handle zip files (if any), rename and use Sigma Imports" Margin="2,10,10,10" >
             <StackPanel Orientation="Vertical">
                 <ProgressBar x:Name="pBar"></ProgressBar>
                 <TextBlock x:Name="tbStatus" Margin="0,10,0,0" TextWrapping="Wrap"></TextBlock>
             </StackPanel>
         </GroupBox>
-        <Button Grid.Row="4" Grid.Column="2" x:Name="btnGo" Margin="5,33,10,34" Click="btnGo_Click" IsEnabled="False">Export</Button>
+            <Button Grid.Row="4" Grid.Column="2" x:Name="btnGo" Margin="5,33,10,34" Click="btnGo_Click" IsEnabled="False">Start</Button>
     </Grid>       
     </ScrollViewer>
 </Window>
