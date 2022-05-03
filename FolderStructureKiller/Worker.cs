@@ -1,7 +1,6 @@
 ﻿using ShareX.HelpersLib;
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SpecifiedRecordsExporter
@@ -104,19 +103,11 @@ namespace SpecifiedRecordsExporter
                     string[] cadFiles = Directory.GetFiles(Path.GetDirectoryName(zipDir), "*.dwg", SearchOption.AllDirectories);
                     if (cadFiles.Length > 0)
                     {
-                        Directory.Delete(zipDir, true);
+                        Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
                     }
                     else
                     {
-                        try
-                        {
-                            File.Delete(fpZipFile);
-                        }
-                        catch
-                        {
-                            Thread.Sleep(5000);
-                            File.Delete(fpZipFile);
-                        }
+                        Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
                     }
                 }
 
@@ -139,6 +130,31 @@ namespace SpecifiedRecordsExporter
                 {
                     DeleteEmptyFolders(dir);
                 }
+            }
+        }
+
+        private bool DeleteFolder(string dir)
+        {
+            try
+            {
+                Directory.Delete(dir, true);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private bool DeleteFile(string fp)
+        {
+            try
+            {
+                File.Delete(fp);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
