@@ -1,6 +1,8 @@
 ﻿using ShareX.HelpersLib;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SpecifiedRecordsExporter
@@ -72,8 +74,27 @@ namespace SpecifiedRecordsExporter
         private string GetDestPath(string origPath)
         {
             string path2 = origPath.Split(rootDir)[1];
-            string fn = freeText + " - " + path2.Replace(@"\", " - ");
-            return Path.Combine(rootDir, fn);
+            StringBuilder fn = new StringBuilder();
+            if (!string.IsNullOrEmpty(freeText))
+            {
+                fn.Append(freeText + " - ");
+            }
+            fn.Append(path2.Replace(@"\", " - "));
+            return Path.Combine(rootDir, fn.ToString());
+        }
+
+        private bool DeleteUnWantedFile(string origPath)
+        {
+            if (Path.GetExtension(origPath) == ".DS_Store")
+            {
+                return true;
+            }
+            else if (Path.GetFileName(origPath) == "TRIM.dat")
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void Preview()
@@ -83,8 +104,15 @@ namespace SpecifiedRecordsExporter
                 string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
                 foreach (string fp in files)
                 {
-                    taskPreview.Report(GetDestPath(fp));
-                    taskPreview.ThrowIfCancellationRequested();
+                    if (DeleteUnWantedFile(fp))
+                    {
+                        Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
+                    }
+                    else
+                    {
+                        taskPreview.Report(GetDestPath(fp));
+                        taskPreview.ThrowIfCancellationRequested();
+                    }
                 }
             }
         }
@@ -100,7 +128,7 @@ namespace SpecifiedRecordsExporter
                 {
                     string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
                     ZipManager.Extract(fpZipFile, zipDir);
-                    string[] cadFiles = Directory.GetFiles(Path.GetDirectoryName(zipDir), "*.dwg", SearchOption.AllDirectories);
+                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
                     if (cadFiles.Length > 0)
                     {
                         Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
@@ -111,8 +139,11 @@ namespace SpecifiedRecordsExporter
                     }
                 }
 
-                string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-                FilesCount = files.Length;
+                ZipCadFolders(rootDir);
+
+                var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+
+                FilesCount = files.Count();
 
                 foreach (string fp in files)
                 {
@@ -129,6 +160,29 @@ namespace SpecifiedRecordsExporter
                 foreach (string dir in dirs)
                 {
                     DeleteEmptyFolders(dir);
+                }
+            }
+        }
+
+        private void ZipCadFolders(string dwgFolder)
+        {
+            string[] dwgFiles = Directory.GetFiles(dwgFolder, "*.dwg", SearchOption.TopDirectoryOnly);
+            if (dwgFiles.Length > 0)
+            {
+                string zipFileName = Path.GetFileName(dwgFolder);
+                if (!Path.GetFileNameWithoutExtension(dwgFolder).Contains("CAD"))
+                {
+                    zipFileName += " CAD";
+                }
+                ZipManager.Compress(dwgFolder, Path.Combine(Path.GetDirectoryName(dwgFolder), $"{zipFileName}.zip"));
+                Helpers.WaitWhile(() => DeleteFolder(dwgFolder), 250, 5000);
+            }
+            else
+            {
+                string[] dwgSubFolders = Directory.GetDirectories(dwgFolder);
+                foreach (string dwgSubFolder in dwgSubFolders)
+                {
+                    ZipCadFolders(dwgSubFolder);
                 }
             }
         }
@@ -157,6 +211,8 @@ namespace SpecifiedRecordsExporter
                 return false;
             }
         }
+
+
 
         private bool MoveFile(string origPath)
         {

@@ -49,6 +49,7 @@ namespace SpecifiedRecordsExporter
         {
             if (!string.IsNullOrEmpty(txtRootDir.Text))
             {
+                btnPreview.IsEnabled = false;
                 lvFiles.Items.Clear();
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
                 worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
@@ -88,6 +89,7 @@ namespace SpecifiedRecordsExporter
                 worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
                 await worker.RenameAsync();
 
+                btnPreview.IsEnabled = true;
                 btnGo.IsEnabled = true;
             }
         }
