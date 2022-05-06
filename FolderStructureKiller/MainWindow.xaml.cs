@@ -57,13 +57,35 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private void Worker_PreviewProgressChanged(string progress)
+        private void Worker_PreviewProgressChanged(PrepareProgressData progress)
         {
-            ListViewItem lvi = new ListViewItem();
-            lvi.Foreground = progress.Length > 260 ? new SolidColorBrush(Colors.Yellow) : new SolidColorBrush(Colors.Green);
-            lvi.Content = progress;
-            lvFiles.Items.Add(lvi);
-            btnGo.IsEnabled = lvFiles.Items.Count > 0;
+            if (!string.IsNullOrEmpty(progress.Status))
+            {
+                tbStatus.Text = progress.Status;
+            }
+
+            if (progress.ProgressType == ProgressType.PreviewFileNames)
+            {
+                ListViewItem lvi = new ListViewItem();
+                lvi.Foreground = progress.CurrentFilePath.Length > 260 ? new SolidColorBrush(Colors.Yellow) : new SolidColorBrush(Colors.Green);
+                lvi.Content = progress.CurrentFilePath;
+                lvFiles.Items.Add(lvi);
+            }
+
+            if (progress.ProgressType == ProgressType.RemoveJunkFiles)
+            {
+                pBar.Value = progress.CurrentFileId;
+                if (worker.MaxFilesCount > 0)
+                {
+                    pBar.Maximum = worker.MaxFilesCount;
+                }
+            }
+
+            if (progress.ProgressType == ProgressType.ReadyToRename)
+            {
+                tbStatus.Text = "Preparation complete!";
+                btnGo.IsEnabled = true;
+            }
         }
 
         private async void btnGo_Click(object sender, RoutedEventArgs e)
@@ -90,24 +112,25 @@ namespace SpecifiedRecordsExporter
                 await worker.RenameAsync();
 
                 btnPreview.IsEnabled = true;
-                btnGo.IsEnabled = true;
+                btnGo.IsEnabled = false;
             }
         }
 
-        private void Worker_FileMoveProgressChanged(float progress)
+        private void Worker_FileMoveProgressChanged(RenameProgressData progress)
         {
             if (!string.IsNullOrEmpty(worker.Error))
             {
                 tbStatus.Text = worker.Error;
             }
 
-            if (worker.FilesCount > 0)
+            pBar.Value = progress.CurrentFileId;
+            if (worker.MaxFilesCount > 0)
             {
-                pBar.Maximum = worker.FilesCount;
-                tbStatus.Text = "Rename complete!";
-            }
+                pBar.Maximum = worker.MaxFilesCount;
 
-            pBar.Value = progress;
+                if (pBar.Value == pBar.Maximum)
+                    tbStatus.Text = "Rename complete!";
+            }
         }
 
         private void lvFiles_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)

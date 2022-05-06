@@ -9,28 +9,33 @@ namespace SpecifiedRecordsExporter
 {
     public class Worker
     {
-        public delegate void RenameProgressChangedEventHandler(float progress);
+        public delegate void RenameProgressChangedEventHandler(RenameProgressData progress);
         public event RenameProgressChangedEventHandler RenameProgressChanged;
 
-        public delegate void PreviewProgressChangedEventHandler(string progress);
+        public delegate void PreviewProgressChangedEventHandler(PrepareProgressData progress);
         public event PreviewProgressChangedEventHandler PreviewProgressChanged;
 
-        public int FilesCount { get; private set; }
-        public int MovedFilesCount { get; private set; }
+        public int MaxFilesCount { get; private set; }
+        public RenameProgressData RenameProgress = new RenameProgressData();
+        public PrepareProgressData PrepareProgress = new PrepareProgressData();
+
         public string Error { get; private set; }
 
-        private TaskEx<float> taskRename;
-        private TaskEx<string> taskPreview;
+        private TaskEx<RenameProgressData> taskRename;
+        private TaskEx<PrepareProgressData> taskPreview;
 
         private string rootDir;
         private string freeText;
 
         public Worker(string rootDir, string freeText)
         {
-            taskPreview = new TaskEx<string>();
+            RenameProgress = new RenameProgressData();
+            PrepareProgress = new PrepareProgressData();
+
+            taskPreview = new TaskEx<PrepareProgressData>();
             taskPreview.ProgressChanged += OnPreviewProgressChanged;
 
-            taskRename = new TaskEx<float>();
+            taskRename = new TaskEx<RenameProgressData>();
             taskRename.ProgressChanged += OnRenameProgressChanged;
 
 
@@ -46,14 +51,14 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private void OnPreviewProgressChanged(string progress)
+        private void OnPreviewProgressChanged(PrepareProgressData progress)
         {
             PreviewProgressChanged?.Invoke(progress);
         }
 
         public async Task PreviewAsync()
         {
-            await taskPreview.Run(Preview);
+            await taskPreview.Run(Prepare);
         }
 
         public async Task RenameAsync()
@@ -61,7 +66,7 @@ namespace SpecifiedRecordsExporter
             await taskRename.Run(Rename);
         }
 
-        private void OnRenameProgressChanged(float progress)
+        private void OnRenameProgressChanged(RenameProgressData progress)
         {
             RenameProgressChanged?.Invoke(progress);
         }
@@ -97,75 +102,76 @@ namespace SpecifiedRecordsExporter
             return false;
         }
 
-        private void Preview()
+        private void Prepare()
         {
             if (Directory.Exists(rootDir))
             {
-                string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-                foreach (string fp in files)
-                {
-                    if (DeleteUnWantedFile(fp))
-                    {
-                        Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
-                    }
-                    else
-                    {
-                        taskPreview.Report(GetDestPath(fp));
-                        taskPreview.ThrowIfCancellationRequested();
-                    }
-                }
+                RemoveJunkFiles();
+                UnzipNonCadFiles();
+                ZipCadFolders(rootDir);
+
+                PrepareProgress.ProgressType = ProgressType.ReadyToRename;
+                taskPreview.Report(PrepareProgress);
             }
         }
 
-        private void Rename()
+        private void RemoveJunkFiles()
         {
-            MovedFilesCount = 0;
-
-            if (Directory.Exists(rootDir))
+            string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+            MaxFilesCount = files.Length;
+            foreach (string fp in files)
             {
-                string[] zipFiles = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories);
-                foreach (string fpZipFile in zipFiles)
+                PrepareProgress.IsJunkFile = DeleteUnWantedFile(fp);
+                PrepareProgress.CurrentFileId++;
+                if (PrepareProgress.IsJunkFile)
                 {
-                    string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
-                    ZipManager.Extract(fpZipFile, zipDir);
-                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
-                    if (cadFiles.Length > 0)
-                    {
-                        Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
-                    }
-                    else
-                    {
-                        Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
-                    }
+                    PrepareProgress.ProgressType = ProgressType.RemoveJunkFiles;
+                    PrepareProgress.CurrentFilePath = fp;
+                    PrepareProgress.Status = $"Removing {fp}";
+                }
+                else
+                {
+                    PrepareProgress.ProgressType = ProgressType.PreviewFileNames;
+                    PrepareProgress.CurrentFilePath = GetDestPath(fp);
                 }
 
-                ZipCadFolders(rootDir);
+                taskPreview.Report(PrepareProgress);
 
-                var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-
-                FilesCount = files.Count();
-
-                foreach (string fp in files)
+                if (PrepareProgress.IsJunkFile)
                 {
-                    if (MoveFile(fp))
-                    {
-                        MovedFilesCount++;
-                        taskRename.Report(MovedFilesCount);
-                    }
-
-                    taskRename.ThrowIfCancellationRequested();
+                    Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
                 }
 
-                string[] dirs = Directory.GetDirectories(rootDir);
-                foreach (string dir in dirs)
+                taskPreview.ThrowIfCancellationRequested();
+            }
+        }
+
+        private void UnzipNonCadFiles()
+        {
+            PrepareProgress.ProgressType = ProgressType.UnzipNonCadFiles;
+            string[] zipFiles = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories);
+            MaxFilesCount = zipFiles.Length;
+            foreach (string fpZipFile in zipFiles)
+            {
+                PrepareProgress.Status = $"Checking zip file {fpZipFile}";
+                taskPreview.Report(PrepareProgress);
+                string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
+                ZipManager.Extract(fpZipFile, zipDir);
+                string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
+                if (cadFiles.Length > 0)
                 {
-                    DeleteEmptyFolders(dir);
+                    Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
+                }
+                else
+                {
+                    Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
                 }
             }
         }
 
         private void ZipCadFolders(string dwgFolder)
         {
+            PrepareProgress.ProgressType = ProgressType.ZipCadFiles;
             string[] dwgFiles = Directory.GetFiles(dwgFolder, "*.dwg", SearchOption.TopDirectoryOnly);
             if (dwgFiles.Length > 0)
             {
@@ -174,6 +180,8 @@ namespace SpecifiedRecordsExporter
                 {
                     zipFileName += " CAD";
                 }
+                PrepareProgress.Status = $"Zipping {dwgFolder}";
+                taskPreview.Report(PrepareProgress);
                 ZipManager.Compress(dwgFolder, Path.Combine(Path.GetDirectoryName(dwgFolder), $"{zipFileName}.zip"));
                 Helpers.WaitWhile(() => DeleteFolder(dwgFolder), 250, 5000);
             }
@@ -183,6 +191,35 @@ namespace SpecifiedRecordsExporter
                 foreach (string dwgSubFolder in dwgSubFolders)
                 {
                     ZipCadFolders(dwgSubFolder);
+                }
+            }
+        }
+
+        private void Rename()
+        {
+            RenameProgress.CurrentFileId = 0;
+
+            if (Directory.Exists(rootDir))
+            {
+                var files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+
+                MaxFilesCount = files.Count();
+
+                foreach (string fp in files)
+                {
+                    if (MoveFile(fp))
+                    {
+                        RenameProgress.CurrentFileId++;
+                        taskRename.Report(RenameProgress);
+                    }
+
+                    taskRename.ThrowIfCancellationRequested();
+                }
+
+                string[] dirs = Directory.GetDirectories(rootDir);
+                foreach (string dir in dirs)
+                {
+                    DeleteEmptyFolders(dir);
                 }
             }
         }
