@@ -145,5 +145,10 @@ namespace SpecifiedRecordsExporter
                 }
             }
         }
+
+        private void txtFreeText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            btnPreview.IsEnabled = true;
+        }
     }
 }
