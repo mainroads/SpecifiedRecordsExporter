@@ -47,7 +47,7 @@ namespace SpecifiedRecordsExporter
                 }
 
                 this.rootDir = rootDir;
-                this.freeText = freeText.Trim();
+                this.freeText = Helpers.GetValidFileName(freeText, ".");
             }
         }
 
