@@ -14,11 +14,18 @@ namespace SpecifiedRecordsExporter
         public MainWindow()
         {
             InitializeComponent();
+            SettingsManager.LoadSettings();
             Title = $"{Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         }
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
+            if (!string.IsNullOrEmpty(SettingsManager.Settings.TRIMdatabaseID))
+            {
+                TRIMHelper trim = new TRIMHelper(SettingsManager.Settings.TRIMdatabaseID, SettingsManager.Settings.TRIMdatabaseWorkgroupServerName);
+                MessageBox.Show(trim.Success.ToString());
+            }
+
             if (chkCopyFiles.IsChecked == true)
             {
                 FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
@@ -149,6 +156,11 @@ namespace SpecifiedRecordsExporter
         private void txtFreeText_TextChanged(object sender, TextChangedEventArgs e)
         {
             btnPreview.IsEnabled = true;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SettingsManager.SaveSettings();
         }
     }
 }

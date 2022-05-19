@@ -13,7 +13,7 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         xmlns:local="clr-namespace:SpecifiedRecordsExporter"
         mc:Ignorable="d"
-        Title="Specified Records Exporter" SizeToContent="Manual" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+        Title="Specified Records Exporter" SizeToContent="Manual" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing">
 
     <ScrollViewer>
      <Grid>

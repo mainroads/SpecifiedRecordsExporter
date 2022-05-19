@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>False</UseWindowsForms>
-    <AssemblyVersion>0.5.1</AssemblyVersion>
-    <FileVersion>0.5.1</FileVersion>
+    <AssemblyVersion>0.5.2</AssemblyVersion>
+    <FileVersion>0.5.2</FileVersion>
     <ApplicationIcon>FolderBlast.ico</ApplicationIcon>
     <PackageIcon>FolderBlast.png</PackageIcon>
     <Company>ShareX Team</Company>
@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="FolderBrowserForWPF" Version="1.2.0" />
     <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
+    <PackageReference Include="MicroFocus.ContentManager.SDK" Version="10.1.0.444" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,18 @@
     <None Update="FolderBlast.png">
       <Pack>True</Pack>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <TRIMInteropFiles Remove="TRIMHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TRIMInteropFiles Remove="Settings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TRIMInteropFiles Remove="SettingsManager.cs" />
   </ItemGroup>
 
 </Project>
