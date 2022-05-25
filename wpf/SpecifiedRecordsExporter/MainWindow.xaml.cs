@@ -20,12 +20,6 @@ namespace SpecifiedRecordsExporter
 
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(SettingsManager.Settings.TRIMdatabaseID))
-            {
-                TRIMHelper trim = new TRIMHelper(SettingsManager.Settings.TRIMdatabaseID, SettingsManager.Settings.TRIMdatabaseWorkgroupServerName);
-                MessageBox.Show(trim.Success.ToString());
-            }
-
             if (chkCopyFiles.IsChecked == true)
             {
                 FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
