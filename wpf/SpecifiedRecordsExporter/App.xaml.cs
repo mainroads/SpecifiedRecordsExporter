@@ -7,6 +7,6 @@ namespace SpecifiedRecordsExporter
     /// </summary>
     public partial class App : Application
     {
-
+        public static string[] ExcludedFilesList = { ".DS_Store", "TRIM.dat" };
     }
 }

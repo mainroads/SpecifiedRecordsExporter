@@ -1,5 +1,7 @@
 ﻿using ShareX.HelpersLib;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +20,21 @@ namespace SpecifiedRecordsExporter
             Title = $"{Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         }
 
+        public static IEnumerable<string> GetFiles(string path, IEnumerable<string> excludedFiles, SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            var filePaths = Directory.EnumerateFiles(path, "*.*", searchOption);
+
+            foreach (var fp in filePaths)
+            {
+                if (excludedFiles.Contains(Path.GetFileName(fp)))
+                {
+                    continue;
+                }
+
+                yield return fp;
+            }
+        }
+
         private void btnBrowse_Click(object sender, RoutedEventArgs e)
         {
             if (chkCopyFiles.IsChecked == true)
@@ -28,14 +45,19 @@ namespace SpecifiedRecordsExporter
                 if (dlg.ShowDialog() == true)
                 {
                     string dir = dlg.FileName;
-                    if (Directory.GetParent(dir).Name == "Downloads")
+                    if (Directory.GetParent(dir).Name != "Downloads")
                     {
-                        txtRootDir.Text = dlg.FileName;
-                        btnPreview.IsEnabled = true;
+                        MessageBox.Show("Specified Records subfolder is not in your Downloads folder!", Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    }
+                    else if (GetFiles(dir, App.ExcludedFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
+                    {
+                        MessageBox.Show("Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!" + GetFiles(dir, App.ExcludedFilesList, SearchOption.TopDirectoryOnly).First().ToString(), Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     else
                     {
-                        MessageBox.Show("Specified Records subfolder is not in your Downloads folder!", Application.Current.MainWindow.Title);
+                        txtRootDir.Text = dlg.FileName;
+                        btnPreview.IsEnabled = true;
                     }
                 }
             }
