@@ -88,15 +88,12 @@ namespace SpecifiedRecordsExporter
             return Path.Combine(rootDir, fn.ToString());
         }
 
-        private bool DeleteUnWantedFile(string origPath)
+        private bool IsJunkFile(string origPath)
         {
-            if (Path.GetExtension(origPath) == ".DS_Store")
+            foreach (string fileName in App.JunkFilesList)
             {
-                return true;
-            }
-            else if (Path.GetFileName(origPath) == "TRIM.dat")
-            {
-                return true;
+                if (Path.GetFileName(origPath) == fileName)
+                    return true;
             }
 
             return false;
@@ -121,7 +118,7 @@ namespace SpecifiedRecordsExporter
             MaxFilesCount = files.Length;
             foreach (string fp in files)
             {
-                PrepareProgress.IsJunkFile = DeleteUnWantedFile(fp);
+                PrepareProgress.IsJunkFile = IsJunkFile(fp);
                 PrepareProgress.CurrentFileId++;
                 if (PrepareProgress.IsJunkFile)
                 {
