@@ -364,3 +364,4 @@ MigrationBackup/
 FodyWeavers.xsd
 .DS_Store
 *.db
+*.DS_Store
