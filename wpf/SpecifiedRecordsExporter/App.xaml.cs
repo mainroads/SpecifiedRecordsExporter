@@ -7,6 +7,6 @@ namespace SpecifiedRecordsExporter
     /// </summary>
     public partial class App : Application
     {
-        public static string[] JunkFilesList = { ".DS_Store", "TRIM.dat" };
+        public static string[] JunkFilesList = { ".DS_Store", "TRIMfiles.dat" };
     }
 }
