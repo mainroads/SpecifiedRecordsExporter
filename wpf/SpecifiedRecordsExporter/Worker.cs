@@ -118,7 +118,7 @@ namespace SpecifiedRecordsExporter
             MaxFilesCount = files.Length;
             foreach (string fp in files)
             {
-                PrepareProgress.IsJunkFile = IsJunkFile(fp);
+                PrepareProgress.IsJunkFile = IsJunkFile(fp) || new FileInfo(fp).Length == 0;
                 PrepareProgress.CurrentFileId++;
                 if (PrepareProgress.IsJunkFile)
                 {

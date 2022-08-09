@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31612.314
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecifiedRecordsExporter", "SpecifiedRecordsExporter\SpecifiedRecordsExporter.csproj", "{DD791AC0-C01F-448B-BE69-C1AA7FCFE813}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelpersLibStd", "C:\Users\mike\source\repos\HelpersLib\HelpersLib\HelpersLibStd.csproj", "{74C38666-F832-4604-80CF-8B1D2FBBF66C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelpersLibStd", "C:\Users\mike\source\repos\McoreD\HelpersLib\HelpersLib\HelpersLibStd.csproj", "{74C38666-F832-4604-80CF-8B1D2FBBF66C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
