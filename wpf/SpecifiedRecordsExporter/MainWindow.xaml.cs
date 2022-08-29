@@ -52,7 +52,7 @@ namespace SpecifiedRecordsExporter
                     }
                     else if (GetFiles(dir, App.JunkFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
                     {
-                        MessageBox.Show("Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!" + GetFiles(dir, App.JunkFilesList, SearchOption.TopDirectoryOnly).First().ToString(), Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!\n\n" + GetFiles(dir, App.JunkFilesList, SearchOption.TopDirectoryOnly).First().ToString(), Application.Current.MainWindow.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                     else
                     {
