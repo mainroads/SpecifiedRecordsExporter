@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ShareX.HelpersLib;
+using System;
 using System.IO;
+using System.Text;
 
 namespace SpecifiedRecordsExporter
 {
@@ -37,6 +39,13 @@ namespace SpecifiedRecordsExporter
             {
                 Settings.Save(SettingsFilePath);
             }
+
+        }
+
+        public static void SaveLog(StringBuilder log)
+        {
+            Helpers.CreateDirectoryFromFilePath(LogFilePath);
+            File.AppendAllText(LogFilePath, log.ToString());
         }
     }
 }

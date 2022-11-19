@@ -27,6 +27,8 @@ namespace SpecifiedRecordsExporter
         private string rootDir;
         private string freeText;
 
+        public StringBuilder DebugLog { get; private set; } = new StringBuilder();
+
         public Worker(string rootDir, string freeText)
         {
             RenameProgress = new RenameProgressData();
@@ -103,6 +105,7 @@ namespace SpecifiedRecordsExporter
         {
             if (Directory.Exists(rootDir))
             {
+                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Prepare started.");
                 RemoveJunkFiles();
                 UnzipNonCadFiles();
                 ZipCadFolders(rootDir);
@@ -137,6 +140,7 @@ namespace SpecifiedRecordsExporter
                 if (PrepareProgress.IsJunkFile)
                 {
                     Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
+                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Removed {fp}");
                 }
 
                 taskPreview.ThrowIfCancellationRequested();
@@ -154,6 +158,7 @@ namespace SpecifiedRecordsExporter
                 taskPreview.Report(PrepareProgress);
                 string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
                 ZipManager.Extract(fpZipFile, zipDir);
+                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {fpZipFile}");
                 string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
                 if (cadFiles.Length > 0)
                 {
@@ -164,6 +169,7 @@ namespace SpecifiedRecordsExporter
                     Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
                 }
             }
+            DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
         }
 
         private void ZipCadFolders(string dwgFolder)
@@ -180,6 +186,7 @@ namespace SpecifiedRecordsExporter
                 PrepareProgress.Status = $"Zipping {dwgFolder}";
                 taskPreview.Report(PrepareProgress);
                 ZipManager.Compress(dwgFolder, Path.Combine(Path.GetDirectoryName(dwgFolder), $"{zipFileName}.zip"));
+                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Zipped {dwgFolder} folder");
                 Helpers.WaitWhile(() => DeleteFolder(dwgFolder), 250, 5000);
             }
             else
@@ -218,6 +225,8 @@ namespace SpecifiedRecordsExporter
                 {
                     DeleteEmptyFolders(dir);
                 }
+                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Renamed {files.Length} files");
+                DebugLog.AppendLine();
             }
         }
 
@@ -237,7 +246,7 @@ namespace SpecifiedRecordsExporter
         {
             try
             {
-                File.Delete(fp);
+                System.IO.File.Delete(fp);
                 return true;
             }
             catch
@@ -256,7 +265,7 @@ namespace SpecifiedRecordsExporter
             {
                 if (destPath.Length < 260)
                 {
-                    File.Move(origPath, destPath);
+                    System.IO.File.Move(origPath, destPath);
                     return true;
                 }
             }

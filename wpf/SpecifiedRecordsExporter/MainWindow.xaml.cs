@@ -77,6 +77,7 @@ namespace SpecifiedRecordsExporter
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
                 worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
                 await worker.PreviewAsync();
+                SettingsManager.SaveLog(worker.DebugLog);
             }
         }
 
@@ -133,6 +134,7 @@ namespace SpecifiedRecordsExporter
                 worker = new Worker(txtRootDir.Text, txtFreeText.Text);
                 worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
                 await worker.RenameAsync();
+                SettingsManager.SaveLog(worker.DebugLog);
 
                 btnPreview.IsEnabled = true;
                 btnGo.IsEnabled = false;
