@@ -107,8 +107,15 @@ namespace SpecifiedRecordsExporter
 
             if (progress.ProgressType == ProgressType.ReadyToRename)
             {
-                tbStatus.Text = "Preparation complete!";
-                btnGo.IsEnabled = true;
+                if (progress.HasLongFileNames)
+                {
+                    tbStatus.Text = "Preparation complete. Please rename long file names before proceeding to rename!";
+                }
+                else
+                {
+                    tbStatus.Text = "Preparation complete!";
+                    btnGo.IsEnabled = true;
+                }
             }
         }
 

@@ -21,5 +21,6 @@
         public bool IsJunkFile;
         public string CurrentFilePath;
         public string Status;
+        public bool HasLongFileNames { get; set; }
     }
 }

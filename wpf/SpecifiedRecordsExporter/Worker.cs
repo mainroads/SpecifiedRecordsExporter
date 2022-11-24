@@ -26,7 +26,6 @@ namespace SpecifiedRecordsExporter
 
         private string rootDir;
         private string freeText;
-
         public StringBuilder DebugLog { get; private set; } = new StringBuilder();
 
         public Worker(string rootDir, string freeText)
@@ -107,8 +106,11 @@ namespace SpecifiedRecordsExporter
             {
                 DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Prepare started.");
                 RemoveJunkFiles();
-                UnzipNonCadFiles();
-                ZipCadFolders(rootDir);
+                if (!PrepareProgress.HasLongFileNames)
+                {
+                    UnzipNonCadFiles();
+                    ZipCadFolders(rootDir);
+                }
 
                 PrepareProgress.ProgressType = ProgressType.ReadyToRename;
                 taskPreview.Report(PrepareProgress);
@@ -121,6 +123,11 @@ namespace SpecifiedRecordsExporter
             MaxFilesCount = files.Length;
             foreach (string fp in files)
             {
+                if (GetDestPath(fp).Length > 260)
+                {
+                    PrepareProgress.HasLongFileNames = true;
+                }
+
                 PrepareProgress.IsJunkFile = IsJunkFile(fp) || new FileInfo(fp).Length == 0;
                 PrepareProgress.CurrentFileId++;
                 if (PrepareProgress.IsJunkFile)
