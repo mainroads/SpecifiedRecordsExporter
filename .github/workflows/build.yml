@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-latest
     
     env:
-      SOLUTION_FILE_PATH: maui/SpecifiedRecordsExporter/SpecifiedRecordsExporter.sln
+      SOLUTION_FILE_PATH: wpf/SpecifiedRecordsExporter.sln
       ISS_FILE_PATH: SpecifiedRecordsExporter.iss
     
     steps:
