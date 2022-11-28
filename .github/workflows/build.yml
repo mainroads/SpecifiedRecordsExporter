@@ -32,6 +32,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: McoreD/HelpersLib
+          path: McoreD\HelpersLib
 
       - name: Setup .NET 5.0
         uses: actions/setup-dotnet@v1
