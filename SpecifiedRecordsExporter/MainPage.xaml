@@ -4,37 +4,46 @@
              x:Class="SpecifiedRecordsExporter.MainPage">
 
     <ScrollView>
-        <VerticalStackLayout
-            Spacing="25"
-            Padding="30,0"
-            VerticalOptions="Center">
+        <VerticalStackLayout Margin="10,0" Spacing="10">
 
-            <Image
-                Source="dotnet_bot.png"
-                SemanticProperties.Description="Cute dot net bot waving hi to you!"
-                HeightRequest="200"
-                HorizontalOptions="Center" />
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkLocateDir" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 1 - Locate the Specified Records folder in Downloads
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkLocateDir}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+            <Entry x:Name="txtRootDir" IsReadOnly="True"></Entry>
 
-            <Label
-                Text="Hello, World!"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"
-                HorizontalOptions="Center" />
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkCopyFiles" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 2 - Copy Specified Records subfolder(s) into the Specified Records folder in your Downloads folder
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkCopyFiles}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
 
-            <Label
-                Text="Welcome to .NET Multi-platform App UI"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I"
-                FontSize="18"
-                HorizontalOptions="Center" />
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkFreeText" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 3 - Enter Free Text
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkFreeText}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" ></Entry>
 
-            <Button
-                x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Center" />
-
+            <Button x:Name="btnExport" Text="Step 4 - Prepare and Export"></Button>
+            <ProgressBar x:Name="pBar" MinimumHeightRequest="50"></ProgressBar>
+            <Label x:Name="lblStatus"></Label>
         </VerticalStackLayout>
     </ScrollView>
 

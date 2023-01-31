@@ -2,24 +2,16 @@
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+    public MainPage()
+    {
+        InitializeComponent();
 
-	public MainPage()
-	{
-		InitializeComponent();
-	}
 
-	private void OnCounterClicked(object sender, EventArgs e)
-	{
-		count++;
+        txtRootDir.Text = $@"C:\Users\{Environment.UserName}\Downloads\Specified Records";
 
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
+    }
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
-	}
+
 }
 
 
