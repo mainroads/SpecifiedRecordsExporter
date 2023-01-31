@@ -315,7 +315,7 @@ namespace SpecifiedRecordsExporter
             }
             catch (Exception ex)
             {
-                Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
+                Error = $"Renaming {origPath}";
                 DebugLog.AppendLine(ex.Message);
             }
 
