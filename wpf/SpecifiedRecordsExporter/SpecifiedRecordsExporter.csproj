@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>False</UseWindowsForms>
@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\HelpersLib\HelpersLib\HelpersLibStd.csproj" />
+    <ProjectReference Include="..\..\..\..\McoreD\HelpersLib\HelpersLib\HelpersLib.csproj" />
   </ItemGroup>
 
 </Project>
