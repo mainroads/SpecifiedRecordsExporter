@@ -1,4 +1,5 @@
 ﻿using ShareX.HelpersLib;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TRIM.SDK;
 
 namespace SpecifiedRecordsExporter
 {
@@ -39,7 +41,13 @@ namespace SpecifiedRecordsExporter
         {
             if (chkCopyFiles.IsChecked == true)
             {
+                string dirSpecifiedRecords = $@"C:\Users\{Environment.UserName}\Downloads\Specified Records";
+                if (!Directory.Exists(dirSpecifiedRecords))
+                {
+                    Directory.CreateDirectory(dirSpecifiedRecords);
+                }
                 FolderBrowserForWPF.Dialog dlg = new FolderBrowserForWPF.Dialog();
+                dlg.FileName = dirSpecifiedRecords;
                 dlg.Title = "Browse for the Specified Records folder...";
 
                 if (dlg.ShowDialog() == true)
