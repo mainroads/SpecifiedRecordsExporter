@@ -120,14 +120,19 @@ namespace SpecifiedRecordsExporter
         private void RemoveJunkFiles()
         {
             string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-            MaxFilesCount = files.Length;
-            foreach (string fp in files)
+            foreach(string fp in files)
             {
                 if (GetDestPath(fp).Length > 260)
                 {
+                    ShortenFilePath(fp);
                     PrepareProgress.HasLongFileNames = true;
                 }
+            }
 
+            string[] filesValid = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+            MaxFilesCount = filesValid.Length;
+            foreach (string fp in filesValid)
+            {
                 PrepareProgress.IsJunkFile = IsJunkFile(fp) || new FileInfo(fp).Length == 0;
                 PrepareProgress.CurrentFileId++;
                 if (PrepareProgress.IsJunkFile)
@@ -154,6 +159,16 @@ namespace SpecifiedRecordsExporter
             }
         }
 
+        private string ShortenFilePath(string fp)
+        {
+            int diff = GetDestPath(fp).Length - 260;
+            string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
+            string sfp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
+            File.Move(fp, sfp);
+            DebugLog.AppendLine($"Renamed {fp} to {sfp}");
+            return sfp;
+        }
+
         private void UnzipNonCadFiles()
         {
             PrepareProgress.ProgressType = ProgressType.UnzipNonCadFiles;
@@ -164,16 +179,41 @@ namespace SpecifiedRecordsExporter
                 PrepareProgress.Status = $"Checking zip file {fpZipFile}";
                 taskPreview.Report(PrepareProgress);
                 string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
-                ZipManager.Extract(fpZipFile, zipDir);
-                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {fpZipFile}");
-                string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
-                if (cadFiles.Length > 0)
+                try
                 {
-                    Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
+                    ZipManager.Extract(fpZipFile, zipDir);
                 }
-                else
+                catch(Exception ex)
                 {
-                    Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
+                    string corruptedRecords = $@"C:\Users\{Environment.UserName}\Downloads\Corrupted Records";
+                    Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
+                    File.Move(fpZipFile, Path.Combine(corruptedRecords, Path.GetFileName(fpZipFile)));
+                    DebugLog.AppendLine(ex.Message);
+                }
+
+                if (Directory.Exists(zipDir))
+                {
+                    string[] longFileNames = Directory.GetFiles(zipDir, "*.*", SearchOption.AllDirectories);
+                    foreach (string fp in longFileNames)
+                    {
+                        if (GetDestPath(fp).Length > 260)
+                        {
+                            ShortenFilePath(fp);
+                            PrepareProgress.HasLongFileNames = true;
+                            break;
+                        }
+                    }
+
+                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {fpZipFile}");
+                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
+                    if (cadFiles.Length > 0)
+                    {
+                        Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
+                    }
+                    else
+                    {
+                        Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
+                    }
                 }
             }
             DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
@@ -218,7 +258,7 @@ namespace SpecifiedRecordsExporter
 
                 foreach (string fp in files)
                 {
-                    if (MoveFile(fp))
+                    if (Helpers.WaitWhile(() => MoveFile(fp), 250, 5000))
                     {
                         RenameProgress.CurrentFileId++;
                         taskRename.Report(RenameProgress);
@@ -270,15 +310,13 @@ namespace SpecifiedRecordsExporter
 
             try
             {
-                if (destPath.Length < 260)
-                {
-                    System.IO.File.Move(origPath, destPath);
-                    return true;
-                }
+                System.IO.File.Move(origPath, destPath);
+                return true;
             }
             catch (Exception ex)
             {
                 Error = $"{destPath} ({Path.GetFileName(destPath).Length} characters): {ex.Message}";
+                DebugLog.AppendLine(ex.Message);
             }
 
             return false;

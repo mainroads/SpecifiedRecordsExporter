@@ -14,6 +14,7 @@ namespace SpecifiedRecordsExporter
     public partial class MainWindow : Window
     {
         private Worker worker;
+        private bool previewOnce;
 
         public MainWindow()
         {
@@ -76,15 +77,26 @@ namespace SpecifiedRecordsExporter
 
         }
 
-        private async void btnPreview_Click(object sender, RoutedEventArgs e)
+        private void BtnPreview_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(txtRootDir.Text))
+            Preview();
+        }
+
+        private async void Preview()
+        {
+            try
             {
-                btnPreview.IsEnabled = false;
-                lvFiles.Items.Clear();
-                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
-                await worker.PreviewAsync();
+                if (!string.IsNullOrEmpty(txtRootDir.Text))
+                {
+                    btnPreview.IsEnabled = false;
+                    lvFiles.Items.Clear();
+                    worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                    worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
+                    await worker.PreviewAsync();
+                }
+            }
+            finally
+            {
                 SettingsManager.SaveLog(worker.DebugLog);
             }
         }
@@ -117,42 +129,53 @@ namespace SpecifiedRecordsExporter
             {
                 if (progress.HasLongFileNames)
                 {
-                    tbStatus.Text = "Preparation complete. Please rename long file names before proceeding to rename!";
+                    tbStatus.Text = "Long file names were detected and shortened. Preparation complete!";
+                    if (!previewOnce)
+                    {
+                        previewOnce = true;
+                        Preview();
+                    }
                 }
                 else
                 {
                     tbStatus.Text = "Preparation complete!";
-                    btnGo.IsEnabled = true;
                 }
+                btnGo.IsEnabled = true;
             }
         }
 
         private async void btnGo_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(txtFreeText.Text))
+            try
             {
-                MessageBox.Show("Free Text is empty!", Application.Current.MainWindow.Title);
-            }
-            else if (chkCopyFiles.IsChecked == false)
-            {
-                MessageBox.Show("You have not completed Step 1 above!", Application.Current.MainWindow.Title);
-            }
-            else if (lvFiles.Items.Count == 0)
-            {
-                MessageBox.Show("Please press the Preview button before trying to rename.", Application.Current.MainWindow.Title);
-            }
-            else
-            {
-                btnGo.IsEnabled = false;
-                pBar.Value = 0;
+                if (string.IsNullOrEmpty(txtFreeText.Text))
+                {
+                    MessageBox.Show("Free Text is empty!", Application.Current.MainWindow.Title);
+                }
+                else if (chkCopyFiles.IsChecked == false)
+                {
+                    MessageBox.Show("You have not completed Step 1 above!", Application.Current.MainWindow.Title);
+                }
+                else if (lvFiles.Items.Count == 0)
+                {
+                    MessageBox.Show("Please press the Preview button before trying to rename.", Application.Current.MainWindow.Title);
+                }
+                else
+                {
+                    btnGo.IsEnabled = false;
+                    pBar.Value = 0;
 
-                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
-                await worker.RenameAsync();
+                    worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                    worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
+                    await worker.RenameAsync();
+
+                    btnPreview.IsEnabled = true;
+                    btnGo.IsEnabled = false;
+                }
+            }
+            finally
+            {
                 SettingsManager.SaveLog(worker.DebugLog);
-
-                btnPreview.IsEnabled = true;
-                btnGo.IsEnabled = false;
             }
         }
 
