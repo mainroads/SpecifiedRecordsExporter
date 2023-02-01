@@ -41,7 +41,8 @@
             </HorizontalStackLayout>
             <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" ></Entry>
 
-            <Button x:Name="btnExport" Text="Step 4 - Prepare and Export"></Button>
+            <Button x:Name="btnPrepare" Text="Step 4 - Prepare to make files records compliant" Clicked="btnPrepare_Clicked"></Button>
+            <Button x:Name="btnExport" Text="Step 5 - Rename and use Sigma Imports" Clicked="btnExport_Clicked"></Button>
             <ProgressBar x:Name="pBar" MinimumHeightRequest="50"></ProgressBar>
             <Label x:Name="lblStatus"></Label>
         </VerticalStackLayout>
