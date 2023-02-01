@@ -47,19 +47,19 @@ jobs:
         run: dotnet restore "${{ env.SOLUTION_FILE_PATH }}"
 
       - name: Build
-        run: dotnet publish -f net7.0-windows10.0.19041.0 -p:WindowsPackageType=None -p:SelfContained=true  -c Release
+        run: dotnet publish -f net7.0-windows10.0.19041.0 -p:WindowsPackageType=None -p:SelfContained=true -c ${{ matrix.configuration }}
 
-      #- name: Create installer
-      #  if: matrix.configuration == 'Release'
-      #  run: |
-      #    & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" "${{ env.ISS_FILE_PATH }}"
+      - name: Create installer
+        if: matrix.configuration == 'Release'
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" "${{ env.ISS_FILE_PATH }}"
 
-      #- name: Upload artifacts
-      #  if: matrix.configuration == 'Release'
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: Setup
-      #    path: Output/*-setup.exe
+      - name: Upload artifacts
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Setup
+          path: Output/*-setup.exe
 
       - name: Release
         uses: softprops/action-gh-release@v1
