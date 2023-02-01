@@ -1,10 +1,8 @@
 #define MyAppDesc "Specified Records Exporter"
 #define MyExeName "SpecifiedRecordsExporter"
 #define MyAppParentDir "SpecifiedRecordsExporter\bin\Release\net7.0-windows10.0.19041.0\win10-x64\publish\"
-#define MyAppPath MyAppParentDir + MyExeName + ".exe"
-#dim Version[4]
-#expr GetVersionComponents(MyAppPath, Version[0], Version[1], Version[2], Version[3])
-#define MyAppVersion Str(Version[0]) + "." + Str(Version[1]) + "." + Str(Version[2])
+#define MyAppFilePath MyAppParentDir + MyExeName + ".exe"
+#define MyAppVersion GetStringFileInfo(MyAppFilePath, "ProductVersion")
 #define MyAppPublisher "ShareX Team"
 
 [Setup]
