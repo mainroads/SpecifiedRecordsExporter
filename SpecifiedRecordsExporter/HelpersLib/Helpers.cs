@@ -843,7 +843,7 @@ namespace ShareX.HelpersLib
 
         public static byte[] ComputeSHA256(byte[] data)
         {
-            using (SHA256Managed hashAlgorithm = new SHA256Managed())
+            using (SHA256 hashAlgorithm = SHA256.Create())
             {
                 return hashAlgorithm.ComputeHash(data);
             }
@@ -853,7 +853,7 @@ namespace ShareX.HelpersLib
         {
             BufferedStream bufferedStream = new BufferedStream(stream, bufferSize);
 
-            using (SHA256Managed hashAlgorithm = new SHA256Managed())
+            using (SHA256 hashAlgorithm = SHA256.Create())
             {
                 return hashAlgorithm.ComputeHash(bufferedStream);
             }
