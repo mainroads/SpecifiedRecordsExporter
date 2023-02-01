@@ -248,7 +248,7 @@ namespace SpecifiedRecordsExporter
 
         private void Rename()
         {
-            RenameProgress.CurrentFileId = 0;
+            RenameProgress.CurrentFileId = 1;
 
             if (Directory.Exists(rootDir))
             {
