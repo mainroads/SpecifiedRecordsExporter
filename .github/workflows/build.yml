@@ -21,7 +21,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      SOLUTION_FILE_PATH: wpf/SpecifiedRecordsExporter.sln
+      SOLUTION_FILE_PATH: SpecifiedRecordsExporter.sln
       ISS_FILE_PATH: SpecifiedRecordsExporter.iss
 
     steps:
