@@ -1,6 +1,6 @@
 #define MyAppDesc "Specified Records Exporter"
 #define MyExeName "SpecifiedRecordsExporter"
-#define MyAppParentDir "wpf\SpecifiedRecordsExporter\bin\Release\net5.0-windows7.0\"
+#define MyAppParentDir "C:\Users\mike\source\repos\mainroads\SpecifiedRecordsExporter\SpecifiedRecordsExporter\bin\Release\net7.0-windows10.0.19041.0\win10-x64\publish\"
 #define MyAppPath MyAppParentDir + MyExeName + ".exe"
 #dim Version[4]
 #expr ParseVersion(MyAppPath, Version[0], Version[1], Version[2], Version[3])
