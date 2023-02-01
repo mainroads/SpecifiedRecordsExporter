@@ -34,10 +34,10 @@ jobs:
           repository: McoreD/HelpersLib
           path: McoreD\HelpersLib
 
-      - name: Setup .NET 5.0
+      - name: Setup .NET 7.0
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 7.0.x
 
       - name: Install dependencies
         run: dotnet restore "${{ env.SOLUTION_FILE_PATH }}"
