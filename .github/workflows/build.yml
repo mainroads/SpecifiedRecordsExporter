@@ -3,9 +3,16 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - "**"
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.gitignore"
+      - "**/*.gitattributes"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -15,8 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         configuration:
-          - Debug
           - Release
+          - Debug
 
     runs-on: windows-latest
 
@@ -25,21 +32,18 @@ jobs:
       ISS_FILE_PATH: SpecifiedRecordsExporter.iss
 
     steps:
-      - name: Checkout mainroads/SpecifiedRecordsExporter
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Checkout McoreD/HelpersLib
-        uses: actions/checkout@v3
-        with:
-          repository: McoreD/HelpersLib
-          path: McoreD\HelpersLib
 
       - name: Setup .NET 7.0
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 7.0.x
 
-      - name: Install dependencies
+      - name: Install MAUI workload
+        run: dotnet workload install maui --ignore-failed-sources
+
+      - name: Restore dependencies
         run: dotnet restore "${{ env.SOLUTION_FILE_PATH }}"
 
       - name: Build
