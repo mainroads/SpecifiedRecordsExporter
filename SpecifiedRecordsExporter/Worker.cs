@@ -9,20 +9,15 @@ namespace SpecifiedRecordsExporter
 {
     public class Worker
     {
-        public delegate void RenameProgressChangedEventHandler(RenameProgressData progress);
-        public event RenameProgressChangedEventHandler RenameProgressChanged;
-
-        public delegate void PreviewProgressChangedEventHandler(PrepareProgressData progress);
+        public delegate void PreviewProgressChangedEventHandler(ProgressData progress);
         public event PreviewProgressChangedEventHandler PreviewProgressChanged;
 
         public int MaxFilesCount { get; private set; }
-        public RenameProgressData RenameProgress = new RenameProgressData();
-        public PrepareProgressData PrepareProgress = new PrepareProgressData();
+        public ProgressData Progress = new ProgressData();
 
         public string Error { get; private set; }
 
-        private TaskEx<RenameProgressData> taskRename;
-        private TaskEx<PrepareProgressData> taskPreview;
+        private TaskEx<ProgressData> taskPrepare;
 
         private string rootDir;
         private string freeText;
@@ -30,15 +25,10 @@ namespace SpecifiedRecordsExporter
 
         public Worker(string rootDir, string freeText)
         {
-            RenameProgress = new RenameProgressData();
-            PrepareProgress = new PrepareProgressData();
+            Progress = new ProgressData();
 
-            taskPreview = new TaskEx<PrepareProgressData>();
-            taskPreview.ProgressChanged += OnPreviewProgressChanged;
-
-            taskRename = new TaskEx<RenameProgressData>();
-            taskRename.ProgressChanged += OnRenameProgressChanged;
-
+            taskPrepare = new TaskEx<ProgressData>();
+            taskPrepare.ProgressChanged += OnPreviewProgressChanged;
 
             if (Directory.Exists(rootDir))
             {
@@ -52,29 +42,19 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private void OnPreviewProgressChanged(PrepareProgressData progress)
+        private void OnPreviewProgressChanged(ProgressData progress)
         {
             PreviewProgressChanged?.Invoke(progress);
         }
 
-        public async Task PreviewAsync()
+        public async Task PrepareAndRenameAsync()
         {
-            await taskPreview.Run(Prepare);
-        }
-
-        public async Task RenameAsync()
-        {
-            await taskRename.Run(Rename);
-        }
-
-        private void OnRenameProgressChanged(RenameProgressData progress)
-        {
-            RenameProgressChanged?.Invoke(progress);
+            await taskPrepare.Run(PrepareAndRename);
         }
 
         public void Stop()
         {
-            taskRename.Cancel();
+            taskPrepare.Cancel();
         }
 
         private string GetDestPath(string origPath)
@@ -100,32 +80,37 @@ namespace SpecifiedRecordsExporter
             return false;
         }
 
+        private void PrepareAndRename()
+        {
+            Prepare();
+            Rename();
+        }
         private void Prepare()
         {
             if (Directory.Exists(rootDir))
             {
                 DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Prepare started.");
                 RemoveJunkFiles();
-                if (!PrepareProgress.HasLongFileNames)
+                if (!Progress.HasLongFileNames)
                 {
                     UnzipNonCadFiles();
                     ZipCadFolders(rootDir);
                 }
 
-                PrepareProgress.ProgressType = ProgressType.ReadyToRename;
-                taskPreview.Report(PrepareProgress);
+                Progress.ProgressType = ProgressType.ReadyToRename;
+                taskPrepare.Report(Progress);
             }
         }
 
         private void RemoveJunkFiles()
         {
             string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
-            foreach(string fp in files)
+            foreach (string fp in files)
             {
                 if (GetDestPath(fp).Length > 260)
                 {
                     ShortenFilePath(fp);
-                    PrepareProgress.HasLongFileNames = true;
+                    Progress.HasLongFileNames = true;
                 }
             }
 
@@ -133,29 +118,29 @@ namespace SpecifiedRecordsExporter
             MaxFilesCount = filesValid.Length;
             foreach (string fp in filesValid)
             {
-                PrepareProgress.IsJunkFile = IsJunkFile(fp);
-                PrepareProgress.CurrentFileId++;
-                if (PrepareProgress.IsJunkFile)
+                Progress.IsJunkFile = IsJunkFile(fp);
+                Progress.CurrentFileId++;
+                if (Progress.IsJunkFile)
                 {
-                    PrepareProgress.ProgressType = ProgressType.RemoveJunkFiles;
-                    PrepareProgress.CurrentFilePath = fp;
-                    PrepareProgress.Status = $"Removing {fp}";
+                    Progress.ProgressType = ProgressType.RemoveJunkFiles;
+                    Progress.CurrentFilePath = fp;
+                    Progress.Status = $"Removing {fp}";
                 }
                 else
                 {
-                    PrepareProgress.ProgressType = ProgressType.PreviewFileNames;
-                    PrepareProgress.CurrentFilePath = GetDestPath(fp);
+                    Progress.ProgressType = ProgressType.PreviewFileNames;
+                    Progress.CurrentFilePath = GetDestPath(fp);
                 }
 
-                taskPreview.Report(PrepareProgress);
+                taskPrepare.Report(Progress);
 
-                if (PrepareProgress.IsJunkFile)
+                if (Progress.IsJunkFile)
                 {
                     Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
                     DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Removed {fp}");
                 }
 
-                taskPreview.ThrowIfCancellationRequested();
+                taskPrepare.ThrowIfCancellationRequested();
             }
         }
 
@@ -171,19 +156,19 @@ namespace SpecifiedRecordsExporter
 
         private void UnzipNonCadFiles()
         {
-            PrepareProgress.ProgressType = ProgressType.UnzipNonCadFiles;
+            Progress.ProgressType = ProgressType.UnzipNonCadFiles;
             string[] zipFiles = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories);
             MaxFilesCount = zipFiles.Length;
             foreach (string fpZipFile in zipFiles)
             {
-                PrepareProgress.Status = $"Checking zip file {fpZipFile}";
-                taskPreview.Report(PrepareProgress);
+                Progress.Status = $"Checking zip file {fpZipFile}";
+                taskPrepare.Report(Progress);
                 string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
                 try
                 {
                     ZipManager.Extract(fpZipFile, zipDir);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     string corruptedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Corrupted Records";
                     Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
@@ -199,7 +184,7 @@ namespace SpecifiedRecordsExporter
                         if (GetDestPath(fp).Length > 260)
                         {
                             ShortenFilePath(fp);
-                            PrepareProgress.HasLongFileNames = true;
+                            Progress.HasLongFileNames = true;
                             break;
                         }
                     }
@@ -221,7 +206,7 @@ namespace SpecifiedRecordsExporter
 
         private void ZipCadFolders(string dwgFolder)
         {
-            PrepareProgress.ProgressType = ProgressType.ZipCadFiles;
+            Progress.ProgressType = ProgressType.ZipCadFiles;
             string[] dwgFiles = Directory.GetFiles(dwgFolder, "*.dwg", SearchOption.TopDirectoryOnly);
             if (dwgFiles.Length > 0)
             {
@@ -230,8 +215,8 @@ namespace SpecifiedRecordsExporter
                 {
                     zipFileName += " CAD";
                 }
-                PrepareProgress.Status = $"Zipping {dwgFolder}";
-                taskPreview.Report(PrepareProgress);
+                Progress.Status = $"Zipping {dwgFolder}";
+                taskPrepare.Report(Progress);
                 ZipManager.Compress(dwgFolder, Path.Combine(Path.GetDirectoryName(dwgFolder), $"{zipFileName}.zip"));
                 DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Zipped {dwgFolder} folder");
                 Helpers.WaitWhile(() => DeleteFolder(dwgFolder), 250, 5000);
@@ -248,7 +233,8 @@ namespace SpecifiedRecordsExporter
 
         private void Rename()
         {
-            RenameProgress.CurrentFileId = 1;
+            Progress.ProgressType = ProgressType.Renaming;
+            Progress.CurrentFileId = 0;
 
             if (Directory.Exists(rootDir))
             {
@@ -260,17 +246,18 @@ namespace SpecifiedRecordsExporter
                 {
                     if (Helpers.WaitWhile(() => MoveFile(fp), 250, 5000))
                     {
-                        RenameProgress.CurrentFileId++;
-                        taskRename.Report(RenameProgress);
+                        Progress.CurrentFilePath = fp;
+                        Progress.CurrentFileId++;
+                        taskPrepare.Report(Progress);
                     }
 
-                    taskRename.ThrowIfCancellationRequested();
+                    taskPrepare.ThrowIfCancellationRequested();
                 }
 
                 string[] dirs = Directory.GetDirectories(rootDir);
                 foreach (string dir in dirs)
                 {
-                    DeleteEmptyFolders(dir);
+                    Helpers.WaitWhile(() => DeleteEmptyFolders(dir), 250, 5000);
                 }
                 DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Renamed {files.Length} files");
                 DebugLog.AppendLine();
@@ -321,17 +308,26 @@ namespace SpecifiedRecordsExporter
             return false;
         }
 
-        private void DeleteEmptyFolders(string dirPath)
+        private bool DeleteEmptyFolders(string dirPath)
         {
-            foreach (string subdirPath in Directory.GetDirectories(dirPath))
+            try
             {
-                DeleteEmptyFolders(subdirPath);
+                foreach (string subdirPath in Directory.GetDirectories(dirPath))
+                {
+                    DeleteEmptyFolders(subdirPath);
+                }
+
+                if (EmptyFolderHelper.CheckDirectoryEmpty(dirPath))
+                {
+                    new DirectoryInfo(dirPath).Delete();
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
             }
 
-            if (EmptyFolderHelper.CheckDirectoryEmpty(dirPath))
-            {
-                new DirectoryInfo(dirPath).Delete();
-            }
         }
     }
 }

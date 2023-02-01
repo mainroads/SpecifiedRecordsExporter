@@ -6,15 +6,11 @@
         UnzipNonCadFiles,
         ZipCadFiles,
         PreviewFileNames,
-        ReadyToRename
+        ReadyToRename,
+        Renaming
     }
 
-    public struct RenameProgressData
-    {
-        public float CurrentFileId { get; set; }
-    }
-
-    public struct PrepareProgressData
+    public struct ProgressData
     {
         public ProgressType ProgressType { get; set; }
         public float CurrentFileId;

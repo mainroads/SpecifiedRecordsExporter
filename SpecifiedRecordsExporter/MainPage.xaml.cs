@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace SpecifiedRecordsExporter;
 
@@ -13,7 +14,6 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
 
-        btnExport.IsEnabled = false;
         Title = $"{App.Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         txtRootDir.Text = dirSpecifiedRecords;
         if (!Directory.Exists(dirSpecifiedRecords))
@@ -46,7 +46,7 @@ public partial class MainPage : ContentPage
         Prepare();
     }
 
-    async void btnExport_Clicked(System.Object sender, System.EventArgs e)
+    private async void Prepare()
     {
         if (!chkCopyFiles.IsChecked)
         {
@@ -62,42 +62,26 @@ public partial class MainPage : ContentPage
         }
         else
         {
-            Rename();
-        }
-    }
+            btnPrepare.IsEnabled = false;
 
-    private async void Prepare()
-    {
-        btnExport.IsEnabled = false;
-        try
-        {
-            if (!string.IsNullOrEmpty(txtRootDir.Text))
+            try
             {
-                btnExport.IsEnabled = false;
-                // lvFiles.Items.Clear();
-                worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-                worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
-                await worker.PreviewAsync();
+                if (!string.IsNullOrEmpty(txtRootDir.Text))
+                {
+                    // lvFiles.Items.Clear();
+                    worker = new Worker(txtRootDir.Text, txtFreeText.Text);
+                    worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
+                    await worker.PrepareAndRenameAsync();
+                }
+            }
+            finally
+            {
+                SettingsManager.SaveLog(worker.DebugLog);
             }
         }
-        finally
-        {
-            btnExport.IsEnabled = true;
-            SettingsManager.SaveLog(worker.DebugLog);
-        }
     }
 
-    private async void Rename()
-    {
-        btnPrepare.IsEnabled = false;
-        pBar.Progress = 0;
-
-        worker = new Worker(txtRootDir.Text, txtFreeText.Text);
-        worker.RenameProgressChanged += Worker_FileMoveProgressChanged;
-        await worker.RenameAsync();
-    }
-
-    private void Worker_PreviewProgressChanged(PrepareProgressData progress)
+    private void Worker_PreviewProgressChanged(ProgressData progress)
     {
         if (!string.IsNullOrEmpty(progress.Status))
         {
@@ -133,25 +117,28 @@ public partial class MainPage : ContentPage
                 lblStatus.Text = "Preparation complete!";
             }
         }
-    }
 
-    private void Worker_FileMoveProgressChanged(RenameProgressData progress)
-    {
-        if (!string.IsNullOrEmpty(worker.Error))
+        if (progress.ProgressType == ProgressType.Renaming)
         {
-            lblStatus.Text = worker.Error;
-        }
+            if (!string.IsNullOrEmpty(worker.Error))
+            {
+                lblStatus.Text = worker.Error;
+            }
+            else
+            {
+                lblStatus.Text = $"Renaming {progress.CurrentFilePath}";
+            }
 
-        pBar.Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
+            pBar.Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
+            
+            if (progress.CurrentFileId == worker.MaxFilesCount)
+            {
 
-        if (progress.CurrentFileId == worker.MaxFilesCount)
-        {
-            lblStatus.Text = "Rename complete!";
-            btnPrepare.IsEnabled = true;
+                lblStatus.Text = "Rename complete!";
+                btnPrepare.IsEnabled = true;
+            }
         }
     }
-
-
 }
 
 

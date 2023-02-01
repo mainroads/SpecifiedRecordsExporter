@@ -15,11 +15,11 @@
 		<ApplicationTitle>SpecifiedRecordsExporter</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.specifiedrecordsexporter</ApplicationId>
+		<ApplicationId>com.sharexteam.specifiedrecordsexporter</ApplicationId>
 		<ApplicationIdGuid>141eef84-22de-4c84-a0b1-e9cacd79f74e</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>0.10.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
