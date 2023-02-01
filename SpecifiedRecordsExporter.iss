@@ -52,7 +52,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: {#MyAppParentDir}*.*; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
+Source: {#MyAppParentDir}*.*; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\{#MyAppDesc}"; Filename: "{app}\{#MyExeName}.exe"
