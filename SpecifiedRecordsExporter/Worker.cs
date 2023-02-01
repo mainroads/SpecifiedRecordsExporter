@@ -1,9 +1,9 @@
-﻿using ShareX.HelpersLib;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ShareX.HelpersLib;
 
 namespace SpecifiedRecordsExporter
 {
@@ -42,9 +42,9 @@ namespace SpecifiedRecordsExporter
 
             if (Directory.Exists(rootDir))
             {
-                if (!rootDir.EndsWith(@"\"))
+                if (!rootDir.EndsWith(Path.DirectorySeparatorChar))
                 {
-                    rootDir += @"\";
+                    rootDir += Path.DirectorySeparatorChar;
                 }
 
                 this.rootDir = rootDir;
@@ -85,7 +85,7 @@ namespace SpecifiedRecordsExporter
             {
                 fn.Append(freeText + " - ");
             }
-            fn.Append(path2.Replace(@"\", " - "));
+            fn.Append(path2.Replace(Path.DirectorySeparatorChar.ToString(), " - "));
             return Path.Combine(rootDir, fn.ToString());
         }
 
@@ -93,7 +93,7 @@ namespace SpecifiedRecordsExporter
         {
             foreach (string fileName in App.JunkFilesList)
             {
-                if (Path.GetFileName(origPath) == fileName)
+                if ((Path.GetFileName(origPath) == fileName) || Path.GetExtension(origPath) == fileName)
                     return true;
             }
 
@@ -133,7 +133,7 @@ namespace SpecifiedRecordsExporter
             MaxFilesCount = filesValid.Length;
             foreach (string fp in filesValid)
             {
-                PrepareProgress.IsJunkFile = IsJunkFile(fp) || new FileInfo(fp).Length == 0;
+                PrepareProgress.IsJunkFile = IsJunkFile(fp);
                 PrepareProgress.CurrentFileId++;
                 if (PrepareProgress.IsJunkFile)
                 {
@@ -185,7 +185,7 @@ namespace SpecifiedRecordsExporter
                 }
                 catch(Exception ex)
                 {
-                    string corruptedRecords = $@"C:\Users\{Environment.UserName}\Downloads\Corrupted Records";
+                    string corruptedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Corrupted Records";
                     Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
                     File.Move(fpZipFile, Path.Combine(corruptedRecords, Path.GetFileName(fpZipFile)));
                     DebugLog.AppendLine(ex.Message);
@@ -248,7 +248,7 @@ namespace SpecifiedRecordsExporter
 
         private void Rename()
         {
-            RenameProgress.CurrentFileId = 0;
+            RenameProgress.CurrentFileId = 1;
 
             if (Directory.Exists(rootDir))
             {
@@ -301,7 +301,6 @@ namespace SpecifiedRecordsExporter
                 return false;
             }
         }
-
 
 
         private bool MoveFile(string origPath)

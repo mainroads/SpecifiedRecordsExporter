@@ -36,6 +36,14 @@ namespace SpecifiedRecordsExporter
 
         public static bool CheckDirectoryEmpty(string path)
         {
+            DirectoryInfo directory = new DirectoryInfo(path);
+            FileInfo[] files = directory.GetFiles();
+            DirectoryInfo[] subdirs = directory.GetDirectories();
+            return files.Length == 0 && subdirs.Length == 0;
+        }
+
+        public static bool CheckDirectoryEmptyWin(string path)
+        {
             if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(path);

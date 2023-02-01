@@ -1,12 +1,15 @@
-﻿using System.Windows;
+﻿namespace SpecifiedRecordsExporter;
 
-namespace SpecifiedRecordsExporter
+public partial class App : Application
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
-    {
-        public static string[] JunkFilesList = { ".DS_Store", "TRIMfiles.dat" };
-    }
+	public static string Title = "Specified Records Exporter";
+    public static string[] JunkFilesList = { ".DS_Store", "TRIMfiles.dat" };
+
+    public App()
+	{
+		InitializeComponent();
+
+		MainPage = new AppShell();
+	}
 }
+
