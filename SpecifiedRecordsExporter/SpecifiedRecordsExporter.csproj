@@ -34,6 +34,9 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-ios|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
+	  <CreatePackage>false</CreatePackage>
+	</PropertyGroup>
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -59,10 +62,35 @@
 	  <None Remove="HelpersLib\Settings\" />
 	  <None Remove="HelpersLib\Extensions\" />
 	  <None Remove="HelpersLib\Zip\" />
+	  <None Remove="MVVM\" />
+	  <None Remove="MVVM\Models\" />
+	  <None Remove="MVVM\ViewModels\" />
+	  <None Remove="MVVM\Views\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="HelpersLib\Settings\" />
 	  <Folder Include="HelpersLib\Extensions\" />
 	  <Folder Include="HelpersLib\Zip\" />
+	  <Folder Include="MVVM\" />
+	  <Folder Include="MVVM\Models\" />
+	  <Folder Include="MVVM\ViewModels\" />
+	  <Folder Include="MVVM\Views\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiXaml Condition=" '$(EnableDefaultXamlItems)' == 'true' " Update="Views\App.xaml">
+	    <SubType>Designer</SubType>
+	  </MauiXaml>
+	  <MauiXaml Condition=" '$(EnableDefaultXamlItems)' == 'true' " Update="Views\AppShell.xaml">
+	    <SubType>Designer</SubType>
+	  </MauiXaml>
+	  <MauiXaml Condition=" '$(EnableDefaultXamlItems)' == 'true' " Update="Views\MainPage.xaml">
+	    <SubType>Designer</SubType>
+	  </MauiXaml>
+	  <MauiXaml Condition=" '$(EnableDefaultXamlItems)' == 'true' " Update="App.xaml">
+	    <SubType>Designer</SubType>
+	  </MauiXaml>
+	  <MauiXaml Condition=" '$(EnableDefaultXamlItems)' == 'true' " Update="AppShell.xaml">
+	    <SubType>Designer</SubType>
+	  </MauiXaml>
 	</ItemGroup>
 </Project>
