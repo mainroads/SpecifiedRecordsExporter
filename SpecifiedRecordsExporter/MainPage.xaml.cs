@@ -41,6 +41,11 @@ public partial class MainPage : ContentPage
         }
     }
 
+    void btnPrepare_Clicked(System.Object sender, System.EventArgs e)
+    {
+        Prepare();
+    }
+
     private async void Prepare()
     {
         if (!chkCopyFiles.IsChecked)
