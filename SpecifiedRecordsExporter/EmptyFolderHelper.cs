@@ -36,11 +36,20 @@ namespace SpecifiedRecordsExporter
 
         public static bool CheckDirectoryEmpty(string path)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return CheckDirectoryEmptyWin(path);
+            else
+                return CheckDirectoryEmptyMac(path);
+        }
+
+        public static bool CheckDirectoryEmptyMac(string path)
+        {
             DirectoryInfo directory = new DirectoryInfo(path);
             FileInfo[] files = directory.GetFiles();
             DirectoryInfo[] subdirs = directory.GetDirectories();
             return files.Length == 0 && subdirs.Length == 0;
         }
+
 
         public static bool CheckDirectoryEmptyWin(string path)
         {

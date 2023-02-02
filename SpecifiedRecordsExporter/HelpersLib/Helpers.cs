@@ -592,8 +592,6 @@ namespace ShareX.HelpersLib
                 catch (Exception e)
                 {
                     DebugHelper.WriteException(e);
-                    //  MessageBox.Show(Resources.Helpers_CreateDirectoryIfNotExist_Create_failed_ + "\r\n\r\n" + e, "ShareX - " + Resources.Error,
-                    //      MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

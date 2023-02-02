@@ -18,7 +18,7 @@ public partial class MainPage : ContentPage
         txtRootDir.Text = dirSpecifiedRecords;
         if (!Directory.Exists(dirSpecifiedRecords))
         {
-            Directory.CreateDirectory(dirSpecifiedRecords);
+            ShareX.HelpersLib.Helpers.CreateDirectoryFromDirectoryPath(dirSpecifiedRecords);
         }
     }
 
@@ -39,11 +39,6 @@ public partial class MainPage : ContentPage
 
             yield return fp;
         }
-    }
-
-    void btnPrepare_Clicked(System.Object sender, System.EventArgs e)
-    {
-        Prepare();
     }
 
     private async void Prepare()
