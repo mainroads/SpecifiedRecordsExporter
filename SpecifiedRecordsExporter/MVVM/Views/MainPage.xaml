@@ -1,8 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpecifiedRecordsExporter"
              x:Class="SpecifiedRecordsExporter.MainPage">
-
+    <ContentPage.BindingContext>
+        <local:MainPageViewModel />
+    </ContentPage.BindingContext>
     <ScrollView>
         <VerticalStackLayout Margin="10,0" Spacing="10">
 
@@ -16,7 +18,7 @@
                     </Label.Triggers>
                 </Label>
             </HorizontalStackLayout>
-            <Entry x:Name="txtRootDir" IsReadOnly="True"></Entry>
+            <Entry x:Name="txtRootDir" IsReadOnly="True" Text="{Binding RootDir}"></Entry>
 
             <HorizontalStackLayout>
                 <CheckBox x:Name="chkCopyFiles" ></CheckBox>
@@ -39,9 +41,10 @@
                     </Label.Triggers>
                 </Label>
             </HorizontalStackLayout>
-            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication"></Entry>
+            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding FreeText}"></Entry>
 
-            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" Clicked="btnPrepare_Clicked"></Button>
+            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" Command="{Binding PrepareCommand}"></Button>
+            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}"></ListView>
             <ProgressBar x:Name="pBar" MinimumHeightRequest="20"></ProgressBar>
             <Label x:Name="lblStatus"></Label>
         </VerticalStackLayout>

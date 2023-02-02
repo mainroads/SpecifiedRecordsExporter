@@ -15,6 +15,7 @@ namespace SpecifiedRecordsExporter
 
         public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
         public string FreeText => "";
+        public ICommand PrepareCommand { private set; get; }
 
         private ObservableCollection<string> filesColl = new ObservableCollection<string>();
         public ObservableCollection<string> FilesCollection
@@ -30,7 +31,10 @@ namespace SpecifiedRecordsExporter
 
         public MainPageViewModel()
         {
+          
         }
+
+
     }
 }
 
