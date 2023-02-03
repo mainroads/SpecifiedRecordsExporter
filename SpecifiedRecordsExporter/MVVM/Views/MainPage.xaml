@@ -31,7 +31,7 @@
 
             <HorizontalStackLayout>
                 <CheckBox x:Name="chkLocateDir" ></CheckBox>
-                <Label VerticalTextAlignment="Center">Step 1 - I have located the Specified Records folder in Downloads
+                <Label VerticalTextAlignment="Center">Step 1 - Locate the Specified Records folder in Downloads
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkLocateDir}, Path=IsChecked}" Value="true">
                             <Setter Property="TextColor" Value="Green" />
@@ -43,7 +43,7 @@
 
             <HorizontalStackLayout>
                 <CheckBox x:Name="chkCopyFiles" IsChecked="{Binding IsFilesCopied}" ></CheckBox>
-                <Label VerticalTextAlignment="Center">Step 2 - I have copied folders of Specified into the Specified Records folder
+                <Label VerticalTextAlignment="Center">Step 2 - Copy folders into the Specified Records folder
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkCopyFiles}, Path=IsChecked}" Value="true">
                             <Setter Property="TextColor" Value="Green" />
@@ -65,7 +65,7 @@
             <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding FreeText}"></Entry>
 
             <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding IsIdle}" Command="{Binding PrepareCommand}"></Button>
-            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}" ItemTemplate="{StaticResource validFileColorDataTemplateSelector}"></ListView>
+            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}" ItemTemplate="{StaticResource validFileColorDataTemplateSelector}" IsVisible="False"></ListView>
             <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding Progress}" ></ProgressBar>
             <Label x:Name="lblStatus" Text="{Binding Status}"></Label>
         </VerticalStackLayout>
