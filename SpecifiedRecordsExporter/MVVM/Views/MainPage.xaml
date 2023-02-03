@@ -5,6 +5,27 @@
     <ContentPage.BindingContext>
         <local:MainPageViewModel />
     </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="longFilePathTemplate">
+                <ViewCell>
+                    <Grid>
+                        <Label Text="{Binding FilePath}" TextColor="Yellow" VerticalOptions="Center" />
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <DataTemplate x:Key="validFilePathTemplate">
+                <ViewCell>
+                    <Grid>
+                        <Label Text="{Binding FilePath}" TextColor="Green" VerticalOptions="Center" />
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <local:ValidFileColorDataTemplateSelector x:Key="validFileColorDataTemplateSelector"
+                LongFilePathTemplate="{StaticResource longFilePathTemplate}"
+                ValidFilePathTemplate="{StaticResource validFilePathTemplate}" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ScrollView>
         <VerticalStackLayout Margin="10,0" Spacing="10">
 
@@ -44,7 +65,7 @@
             <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding FreeText}"></Entry>
 
             <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding IsIdle}" Command="{Binding PrepareCommand}"></Button>
-            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}"></ListView>
+            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}" ItemTemplate="{StaticResource validFileColorDataTemplateSelector}"></ListView>
             <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding Progress}" ></ProgressBar>
             <Label x:Name="lblStatus" Text="{Binding Status}"></Label>
         </VerticalStackLayout>

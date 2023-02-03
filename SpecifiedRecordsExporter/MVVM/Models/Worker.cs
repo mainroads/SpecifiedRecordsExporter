@@ -109,7 +109,7 @@ namespace SpecifiedRecordsExporter
             {
                 if (GetDestPath(fp).Length > 260)
                 {
-                    ShortenFilePath(fp);
+                    Helpers.WaitWhile(() => ShortenFilePath(fp), 250, 5000);
                     Progress.HasLongFileNames = true;
                 }
             }
@@ -144,16 +144,6 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private string ShortenFilePath(string fp)
-        {
-            int diff = GetDestPath(fp).Length - 260;
-            string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
-            string sfp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
-            File.Move(fp, sfp);
-            DebugLog.AppendLine($"Renamed {fp} to {sfp}");
-            return sfp;
-        }
-
         private void UnzipNonCadFiles()
         {
             Progress.ProgressType = ProgressType.UnzipNonCadFiles;
@@ -183,7 +173,7 @@ namespace SpecifiedRecordsExporter
                     {
                         if (GetDestPath(fp).Length > 260)
                         {
-                            ShortenFilePath(fp);
+                            Helpers.WaitWhile(() => ShortenFilePath(fp), 250, 5000);
                             Progress.HasLongFileNames = true;
                             break;
                         }
@@ -289,6 +279,25 @@ namespace SpecifiedRecordsExporter
             }
         }
 
+        private bool ShortenFilePath(string fp)
+        {
+            int diff = GetDestPath(fp).Length - 260;
+            string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
+            string sfp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
+
+            try
+            {
+                System.IO.File.Move(fp, sfp);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Error = $"Renaming {fp}";
+                DebugLog.AppendLine(ex.Message);
+            }
+
+            return false;
+        }
 
         private bool MoveFile(string origPath)
         {

@@ -15,7 +15,6 @@ namespace SpecifiedRecordsExporter
         }
 
         private Worker worker;
-        private bool previewOnce;
 
         #region AppDataModel Properties
         // TODO: AppDataModel AppData
@@ -57,8 +56,8 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private ObservableCollection<string> filesColl = new ObservableCollection<string>();
-        public ObservableCollection<string> FilesCollection
+        private ObservableCollection<SpecifiedRecord> filesColl = new ObservableCollection<SpecifiedRecord>();
+        public ObservableCollection<SpecifiedRecord> FilesCollection
         {
             get { return filesColl; }
             set
@@ -157,10 +156,7 @@ namespace SpecifiedRecordsExporter
 
             if (progress.ProgressType == ProgressType.PreviewFileNames)
             {
-                // ListViewItem lvi = new ListViewItem();
-                // lvi.Foreground = progress.CurrentFilePath.Length > 260 ? new SolidColorBrush(Colors.Yellow) : new SolidColorBrush(Colors.Green);
-                // lvi.Content = progress.CurrentFilePath;
-                // lvFiles.Items.Add(lvi);
+                FilesCollection.Add(new SpecifiedRecord() { FilePath = progress.CurrentFilePath });
             }
 
             if (progress.ProgressType == ProgressType.RemoveJunkFiles)
@@ -173,11 +169,6 @@ namespace SpecifiedRecordsExporter
             {
                 if (progress.HasLongFileNames)
                 {
-                    if (!previewOnce)
-                    {
-                        previewOnce = true;
-                        Prepare();
-                    }
                     Status = "Long file names were detected and shortened. Preparation complete!";
                 }
                 else
