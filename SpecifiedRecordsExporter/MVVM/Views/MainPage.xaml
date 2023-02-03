@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpecifiedRecordsExporter"
-             x:Class="SpecifiedRecordsExporter.MainPage">
+             x:Class="SpecifiedRecordsExporter.MainPage" Title="{Binding Title}">
     <ContentPage.BindingContext>
         <local:MainPageViewModel />
     </ContentPage.BindingContext>
@@ -10,7 +10,7 @@
 
             <HorizontalStackLayout>
                 <CheckBox x:Name="chkLocateDir" ></CheckBox>
-                <Label VerticalTextAlignment="Center">Step 1 - Locate the Specified Records folder in Downloads
+                <Label VerticalTextAlignment="Center">Step 1 - I have located the Specified Records folder in Downloads
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkLocateDir}, Path=IsChecked}" Value="true">
                             <Setter Property="TextColor" Value="Green" />
@@ -21,8 +21,8 @@
             <Entry x:Name="txtRootDir" IsReadOnly="True" Text="{Binding RootDir}"></Entry>
 
             <HorizontalStackLayout>
-                <CheckBox x:Name="chkCopyFiles" ></CheckBox>
-                <Label VerticalTextAlignment="Center">Step 2 - Copy Specified Records subfolder(s) into the Specified Records folder in your Downloads folder
+                <CheckBox x:Name="chkCopyFiles" IsChecked="{Binding IsFilesCopied}" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 2 - I have copied folders of Specified into the Specified Records folder
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkCopyFiles}, Path=IsChecked}" Value="true">
                             <Setter Property="TextColor" Value="Green" />
@@ -43,10 +43,10 @@
             </HorizontalStackLayout>
             <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding FreeText}"></Entry>
 
-            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" Command="{Binding PrepareCommand}"></Button>
+            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding IsIdle}" Command="{Binding PrepareCommand}"></Button>
             <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}"></ListView>
-            <ProgressBar x:Name="pBar" MinimumHeightRequest="20"></ProgressBar>
-            <Label x:Name="lblStatus"></Label>
+            <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding Progress}" ></ProgressBar>
+            <Label x:Name="lblStatus" Text="{Binding Status}"></Label>
         </VerticalStackLayout>
     </ScrollView>
 

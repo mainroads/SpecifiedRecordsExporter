@@ -11,7 +11,6 @@ namespace SpecifiedRecordsExporter
         {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }
 
