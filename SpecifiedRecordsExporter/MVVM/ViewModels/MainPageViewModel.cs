@@ -23,9 +23,39 @@ namespace SpecifiedRecordsExporter
         public bool IsFilesCopied { get; set; }
         public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
         public string FreeText { get; set; }
-        public string Status { get; set; }
-        public double Progress { get; set; }
-        public bool IsIdle { get; set; }
+
+        private string _status;
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                OnPropertyChanged(nameof(Status));
+            }
+        }
+
+        private double _progress;
+        public double Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged(nameof(Progress));
+            }
+        }
+
+        private bool _isIdle;
+        public bool IsIdle
+        {
+            get { return _isIdle; }
+            set
+            {
+                _isIdle = value;
+                OnPropertyChanged(nameof(IsIdle));
+            }
+        }
 
         private ObservableCollection<string> filesColl = new ObservableCollection<string>();
         public ObservableCollection<string> FilesCollection
@@ -35,7 +65,7 @@ namespace SpecifiedRecordsExporter
             {
                 if (value != this.filesColl)
                     filesColl = value;
-                this.SetPropertyChanged("FilesCollection");
+                OnPropertyChanged(nameof(FilesCollection));
             }
         }
 
@@ -82,8 +112,6 @@ namespace SpecifiedRecordsExporter
             }
             else
             {
-                IsIdle = false;
-
                 try
                 {
                     if (!string.IsNullOrEmpty(RootDir))
@@ -137,6 +165,7 @@ namespace SpecifiedRecordsExporter
 
             if (progress.ProgressType == ProgressType.RemoveJunkFiles)
             {
+                IsIdle = false;
                 Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
             }
 
