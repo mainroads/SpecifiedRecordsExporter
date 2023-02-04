@@ -6,7 +6,6 @@ namespace SpecifiedRecordsExporter;
 public partial class MainPage : ContentPage
 {
     private Worker worker;
-    private bool previewOnce;
 
     string dirSpecifiedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
 
@@ -105,11 +104,6 @@ public partial class MainPage : ContentPage
         {
             if (progress.HasLongFileNames)
             {
-                if (!previewOnce)
-                {
-                    previewOnce = true;
-                    Prepare();
-                }
                 lblStatus.Text = "Long file names were detected and shortened. Preparation complete!";
             }
             else
