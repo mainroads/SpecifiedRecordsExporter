@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpecifiedRecordsExporter"
-             x:Class="SpecifiedRecordsExporter.MainPage" Title="{Binding Title}">
+             x:Class="SpecifiedRecordsExporter.MainPage" Title="{Binding AppData.Title}">
     <ContentPage.BindingContext>
         <local:MainPageViewModel />
     </ContentPage.BindingContext>
@@ -39,10 +39,10 @@
                     </Label.Triggers>
                 </Label>
             </HorizontalStackLayout>
-            <Entry x:Name="txtRootDir" IsReadOnly="True" Text="{Binding RootDir}"></Entry>
+            <Entry x:Name="txtRootDir" IsReadOnly="True" Text="{Binding AppData.RootDir}"></Entry>
 
             <HorizontalStackLayout>
-                <CheckBox x:Name="chkCopyFiles" IsChecked="{Binding IsFilesCopied}" ></CheckBox>
+                <CheckBox x:Name="chkCopyFiles" IsChecked="{Binding AppData.IsFilesCopied}" ></CheckBox>
                 <Label VerticalTextAlignment="Center">Step 2 - Copy folders into the Specified Records folder
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkCopyFiles}, Path=IsChecked}" Value="true">
@@ -62,12 +62,12 @@
                     </Label.Triggers>
                 </Label>
             </HorizontalStackLayout>
-            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding FreeText}"></Entry>
+            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding AppData.FreeText}"></Entry>
 
-            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding IsIdle}" Command="{Binding PrepareCommand}"></Button>
+            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding AppData.IsIdle}" Command="{Binding PrepareCommand}"></Button>
             <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}" ItemTemplate="{StaticResource validFileColorDataTemplateSelector}" IsVisible="False"></ListView>
-            <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding Progress}" ></ProgressBar>
-            <Label x:Name="lblStatus" Text="{Binding Status}"></Label>
+            <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding AppData.Progress}" ></ProgressBar>
+            <Label x:Name="lblStatus" Text="{Binding AppData.Status}"></Label>
         </VerticalStackLayout>
     </ScrollView>
 

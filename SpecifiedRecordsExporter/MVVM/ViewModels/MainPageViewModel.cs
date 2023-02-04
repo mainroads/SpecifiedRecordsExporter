@@ -16,10 +16,6 @@ namespace SpecifiedRecordsExporter
 
         private Worker worker;
 
-        #region AppDataModel Properties
-
-        // TODO: Try AppData
-        /*
         private AppDataModel _appData = new AppDataModel();
         public AppDataModel AppData
         {
@@ -30,59 +26,6 @@ namespace SpecifiedRecordsExporter
                 OnPropertyChanged(nameof(AppData));
             }
         }
-        */
-
-        public string Title => $"{App.Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
-        public bool IsFilesCopied { get; set; }
-        public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
-        public string FreeText { get; set; }
-
-        private string _status;
-        public string Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
-                OnPropertyChanged(nameof(Status));
-            }
-        }
-
-        private double _progress;
-        public double Progress
-        {
-            get { return _progress; }
-            set
-            {
-                _progress = value;
-                OnPropertyChanged(nameof(Progress));
-            }
-        }
-
-        private bool _isIdle;
-        public bool IsIdle
-        {
-            get { return _isIdle; }
-            set
-            {
-                _isIdle = value;
-                OnPropertyChanged(nameof(IsIdle));
-            }
-        }
-
-        private ObservableCollection<SpecifiedRecord> filesColl = new ObservableCollection<SpecifiedRecord>();
-        public ObservableCollection<SpecifiedRecord> FilesCollection
-        {
-            get { return filesColl; }
-            set
-            {
-                if (value != this.filesColl)
-                    filesColl = value;
-                OnPropertyChanged(nameof(FilesCollection));
-            }
-        }
-
-        #endregion
 
         public Command PrepareCommand { private set; get; }
 
@@ -106,20 +49,20 @@ namespace SpecifiedRecordsExporter
 
         private async void Prepare()
         {
-            if (!Directory.Exists(RootDir))
+            if (!Directory.Exists(AppData.RootDir))
             {
-                ShareX.HelpersLib.Helpers.CreateDirectoryFromDirectoryPath(RootDir);
+                ShareX.HelpersLib.Helpers.CreateDirectoryFromDirectoryPath(AppData.RootDir);
             }
 
-            if (!IsFilesCopied)
+            if (!AppData.IsFilesCopied)
             {
                 await App.Current.MainPage.DisplayAlert(App.Title, "You have not completed Step 1 above!", "OK");
             }
-            else if (GetFiles(RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
+            else if (GetFiles(AppData.RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
             {
-                await App.Current.MainPage.DisplayAlert(App.Title, "Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!\n\n" + GetFiles(RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).First().ToString(), "OK");
+                await App.Current.MainPage.DisplayAlert(App.Title, "Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!\n\n" + GetFiles(AppData.RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).First().ToString(), "OK");
             }
-            else if (string.IsNullOrEmpty(FreeText))
+            else if (string.IsNullOrEmpty(AppData.FreeText))
             {
                 await App.Current.MainPage.DisplayAlert(App.Title, "Free Text is empty!", "OK");
             }
@@ -127,10 +70,10 @@ namespace SpecifiedRecordsExporter
             {
                 try
                 {
-                    if (!string.IsNullOrEmpty(RootDir))
+                    if (!string.IsNullOrEmpty(AppData.RootDir))
                     {
-                        FilesCollection.Clear();
-                        worker = new Worker(RootDir, FreeText);
+                        AppData.FilesCollection.Clear();
+                        worker = new Worker(AppData.RootDir, AppData.FreeText);
                         worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
                         await worker.PrepareAndRenameAsync();
                     }
@@ -165,29 +108,29 @@ namespace SpecifiedRecordsExporter
         {
             if (!string.IsNullOrEmpty(progress.Status))
             {
-                Status = progress.Status;
+                AppData.Status = progress.Status;
             }
 
             if (progress.ProgressType == ProgressType.PreviewFileNames)
             {
-                FilesCollection.Add(new SpecifiedRecord() { FilePath = progress.CurrentFilePath });
+                AppData.FilesCollection.Add(new SpecifiedRecord() { FilePath = progress.CurrentFilePath });
             }
 
             if (progress.ProgressType == ProgressType.RemoveJunkFiles)
             {
-                IsIdle = false;
-                Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
+                AppData.IsIdle = false;
+                AppData.Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
             }
 
             if (progress.ProgressType == ProgressType.ReadyToRename)
             {
                 if (progress.HasLongFileNames)
                 {
-                    Status = "Long file names were detected and shortened. Preparation complete!";
+                    AppData.Status = "Long file names were detected and shortened. Preparation complete!";
                 }
                 else
                 {
-                    Status = "Preparation complete!";
+                    AppData.Status = "Preparation complete!";
                 }
             }
 
@@ -195,20 +138,20 @@ namespace SpecifiedRecordsExporter
             {
                 if (!string.IsNullOrEmpty(worker.Error))
                 {
-                    Status = worker.Error;
+                    AppData.Status = worker.Error;
                 }
                 else
                 {
-                    Status = $"Renaming {progress.CurrentFilePath}";
+                    AppData.Status = $"Renaming {progress.CurrentFilePath}";
                 }
 
-                Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
+                AppData.Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
 
                 if (progress.CurrentFileId == worker.MaxFilesCount)
                 {
 
-                    Status = "Rename complete!";
-                    IsIdle = true;
+                    AppData.Status = "Rename complete!";
+                    AppData.IsIdle = true;
                 }
             }
         }
