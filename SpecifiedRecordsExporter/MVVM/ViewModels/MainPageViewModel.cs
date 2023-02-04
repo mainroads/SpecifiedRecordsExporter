@@ -17,7 +17,21 @@ namespace SpecifiedRecordsExporter
         private Worker worker;
 
         #region AppDataModel Properties
-        // TODO: AppDataModel AppData
+
+        // TODO: Try AppData
+        /*
+        private AppDataModel _appData = new AppDataModel();
+        public AppDataModel AppData
+        {
+            get { return _appData; }
+            set
+            {
+                _appData = value;
+                OnPropertyChanged(nameof(AppData));
+            }
+        }
+        */
+
         public string Title => $"{App.Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         public bool IsFilesCopied { get; set; }
         public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";

@@ -1,28 +1,60 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace SpecifiedRecordsExporter
 {
     public class AppDataModel : ObservableModel
     {
+        public string Title => $"{App.Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         public bool IsFilesCopied { get; set; }
         public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
-        public string FreeText { get; set; } = "Test";
-        public string Status { get; set; }
-        public double Progress { get; set; }
-        public bool IsIdle { get; set; }
+        public string FreeText { get; set; }
 
-        private ObservableCollection<string> filesColl = new ObservableCollection<string>();
-        public ObservableCollection<string> FilesCollection
+        private string _status;
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                OnPropertyChanged(nameof(Status));
+            }
+        }
+
+        private double _progress;
+        public double Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged(nameof(Progress));
+            }
+        }
+
+        private bool _isIdle;
+        public bool IsIdle
+        {
+            get { return _isIdle; }
+            set
+            {
+                _isIdle = value;
+                OnPropertyChanged(nameof(IsIdle));
+            }
+        }
+
+        private ObservableCollection<SpecifiedRecord> filesColl = new ObservableCollection<SpecifiedRecord>();
+        public ObservableCollection<SpecifiedRecord> FilesCollection
         {
             get { return filesColl; }
             set
             {
                 if (value != this.filesColl)
                     filesColl = value;
-                this.SetPropertyChanged("FilesCollection");
+                OnPropertyChanged(nameof(FilesCollection));
             }
         }
 
