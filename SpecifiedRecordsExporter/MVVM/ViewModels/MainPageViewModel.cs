@@ -129,7 +129,7 @@ namespace SpecifiedRecordsExporter
                 {
                     if (!string.IsNullOrEmpty(RootDir))
                     {
-                        // lvFiles.Items.Clear();
+                        FilesCollection.Clear();
                         worker = new Worker(RootDir, FreeText);
                         worker.PreviewProgressChanged += Worker_PreviewProgressChanged;
                         await worker.PrepareAndRenameAsync();
