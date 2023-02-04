@@ -234,7 +234,7 @@ namespace SpecifiedRecordsExporter
 
                 foreach (string fp in files)
                 {
-                    if (Helpers.WaitWhile(() => MoveFile(fp), 250, 5000))
+                    if (Helpers.WaitWhile(() => RenameFile(fp), 250, 5000))
                     {
                         Progress.CurrentFilePath = fp;
                         Progress.CurrentFileId++;
@@ -299,7 +299,7 @@ namespace SpecifiedRecordsExporter
             return false;
         }
 
-        private bool MoveFile(string origPath)
+        private bool RenameFile(string origPath)
         {
             string destPath = GetDestPath(origPath);
 
