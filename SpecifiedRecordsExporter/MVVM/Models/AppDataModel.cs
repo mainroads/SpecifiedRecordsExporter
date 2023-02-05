@@ -20,7 +20,7 @@ namespace SpecifiedRecordsExporter
             set
             {
                 _status = value;
-                OnPropertyChanged(nameof(Status));
+                OnPropertyChanged();
             }
         }
 
@@ -31,7 +31,7 @@ namespace SpecifiedRecordsExporter
             set
             {
                 _progress = value;
-                OnPropertyChanged(nameof(Progress));
+                OnPropertyChanged();
             }
         }
 
@@ -42,7 +42,7 @@ namespace SpecifiedRecordsExporter
             set
             {
                 _isIdle = value;
-                OnPropertyChanged(nameof(IsIdle));
+                OnPropertyChanged();
             }
         }
 
@@ -52,9 +52,8 @@ namespace SpecifiedRecordsExporter
             get { return filesColl; }
             set
             {
-                if (value != this.filesColl)
-                    filesColl = value;
-                OnPropertyChanged(nameof(FilesCollection));
+                filesColl = value;
+                OnPropertyChanged();
             }
         }
 

@@ -9,10 +9,6 @@ namespace SpecifiedRecordsExporter
     public class MainPageViewModel : ViewModelBase, INotifyPropertyChanged
     {
         public new event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         private Worker worker;
 
@@ -23,7 +19,7 @@ namespace SpecifiedRecordsExporter
             set
             {
                 _appData = value;
-                OnPropertyChanged(nameof(AppData));
+                OnPropertyChanged();
             }
         }
 
