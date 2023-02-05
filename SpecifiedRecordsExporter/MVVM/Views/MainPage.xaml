@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpecifiedRecordsExporter"
+             x:Class="SpecifiedRecordsExporter.MainPage" Title="{Binding AppData.Title}">
+    <ContentPage.BindingContext>
+        <local:MainPageViewModel />
+    </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="longFilePathTemplate">
+                <ViewCell>
+                    <Grid>
+                        <Label Text="{Binding FilePath}" TextColor="Yellow" VerticalOptions="Center" />
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <DataTemplate x:Key="validFilePathTemplate">
+                <ViewCell>
+                    <Grid>
+                        <Label Text="{Binding FilePath}" TextColor="Green" VerticalOptions="Center" />
+                    </Grid>
+                </ViewCell>
+            </DataTemplate>
+            <local:ValidFileColorDataTemplateSelector x:Key="validFileColorDataTemplateSelector"
+                LongFilePathTemplate="{StaticResource longFilePathTemplate}"
+                ValidFilePathTemplate="{StaticResource validFilePathTemplate}" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ScrollView>
+        <VerticalStackLayout Margin="10,0" Spacing="10">
+
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkLocateDir" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 1 - Locate the Specified Records folder in Downloads
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkLocateDir}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+            <Entry x:Name="txtRootDir" IsReadOnly="True" Text="{Binding AppData.RootDir}"></Entry>
+
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkCopyFiles" IsChecked="{Binding AppData.IsFilesCopied}" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 2 - Copy folders into the Specified Records folder
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkCopyFiles}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout>
+                <CheckBox x:Name="chkFreeText" ></CheckBox>
+                <Label VerticalTextAlignment="Center">Step 3 - Enter Free Text
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference chkFreeText}, Path=IsChecked}" Value="true">
+                            <Setter Property="TextColor" Value="Green" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+            <Entry x:Name="txtFreeText" Placeholder="C151.21 MEBD Mandurah Estuary Bridge Duplication" Text="{Binding AppData.FreeText}"></Entry>
+
+            <Button x:Name="btnPrepare" Text="Step 4 - Make files records compliant and Rename to use Sigma Imports" IsEnabled="{Binding AppData.IsIdle}" Command="{Binding PrepareCommand}"></Button>
+            <ListView x:Name="lvFiles" ItemsSource="{Binding FilesCollection}" ItemTemplate="{StaticResource validFileColorDataTemplateSelector}" IsVisible="False"></ListView>
+            <ProgressBar x:Name="pBar" MinimumHeightRequest="20" Progress="{Binding AppData.Progress}" ></ProgressBar>
+            <Label x:Name="lblStatus" Text="{Binding AppData.Status}"></Label>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+
