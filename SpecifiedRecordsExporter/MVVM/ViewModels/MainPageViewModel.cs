@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
 
 namespace SpecifiedRecordsExporter
 {
@@ -45,6 +41,8 @@ namespace SpecifiedRecordsExporter
 
         private async void Prepare()
         {
+            AppData.IsIdle = false;
+
             if (!Directory.Exists(AppData.RootDir))
             {
                 ShareX.HelpersLib.Helpers.CreateDirectoryFromDirectoryPath(AppData.RootDir);
@@ -114,7 +112,6 @@ namespace SpecifiedRecordsExporter
 
             if (progress.ProgressType == ProgressType.RemoveJunkFiles)
             {
-                AppData.IsIdle = false;
                 AppData.Progress = (double)progress.CurrentFileId / (double)worker.MaxFilesCount;
             }
 

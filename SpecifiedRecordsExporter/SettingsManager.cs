@@ -1,6 +1,4 @@
 ﻿using ShareX.HelpersLib;
-using System;
-using System.IO;
 using System.Text;
 
 namespace SpecifiedRecordsExporter

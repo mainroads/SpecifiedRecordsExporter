@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace SpecifiedRecordsExporter
 {
@@ -35,7 +32,7 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private bool _isIdle;
+        private bool _isIdle = true;
         public bool IsIdle
         {
             get { return _isIdle; }
