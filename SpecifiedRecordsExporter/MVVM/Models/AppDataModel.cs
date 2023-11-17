@@ -7,7 +7,18 @@ namespace SpecifiedRecordsExporter
     {
         public string Title => $"{App.Title} v{Assembly.GetExecutingAssembly().GetName().Version}";
         public bool IsFilesCopied { get; set; }
-        public string RootDir => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
+        public string RootDir
+        {
+            get
+            {
+                if (!Directory.Exists(SettingsManager.Settings.RootDir))
+                {
+                    SettingsManager.Settings.RootDir = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Specified Records";
+                }
+                return SettingsManager.Settings.RootDir;
+            }
+        }
+
         public string FreeText { get; set; }
 
         private string _status;
