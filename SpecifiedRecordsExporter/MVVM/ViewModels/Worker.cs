@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using ShareX.HelpersLib;
 using System.Text;
-using System.Threading.Tasks;
-using ShareX.HelpersLib;
 
 namespace SpecifiedRecordsExporter
 {
@@ -144,25 +140,36 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private void UnzipNonCadFiles()
+        public void UnzipNonCadFiles()
         {
-            Progress.ProgressType = ProgressType.UnzipNonCadFiles;
-            string[] zipFiles = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories);
-            MaxFilesCount = zipFiles.Length;
-            foreach (string fpZipFile in zipFiles)
+            try
             {
-                Progress.Status = $"Checking zip file {fpZipFile}";
+                UnzipNonCadFilesRecursive(rootDir);
+            }
+            catch (Exception ex)
+            {
+                DebugLog.AppendLine($"Error while unzipping files: {ex.Message}");
+            }
+        }
+
+        private void UnzipNonCadFilesRecursive(string directoryPath)
+        {
+            string[] zipFiles = Directory.GetFiles(directoryPath, "*.zip", SearchOption.AllDirectories);
+            foreach (string zipFilePath in zipFiles)
+            {
+                Progress.Status = $"Checking zip file {zipFilePath}";
                 taskPrepare.Report(Progress);
-                string zipDir = Path.Combine(Path.GetDirectoryName(fpZipFile), Path.GetFileNameWithoutExtension(fpZipFile));
+                string zipDir = Path.Combine(Path.GetDirectoryName(zipFilePath), Path.GetFileNameWithoutExtension(zipFilePath));
+
                 try
                 {
-                    ZipManager.Extract(fpZipFile, zipDir);
+                    ZipManager.Extract(zipFilePath, zipDir);
                 }
                 catch (Exception ex)
                 {
                     string corruptedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Corrupted Records";
                     Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
-                    File.Move(fpZipFile, Path.Combine(corruptedRecords, Path.GetFileName(fpZipFile)));
+                    File.Move(zipFilePath, Path.Combine(corruptedRecords, Path.GetFileName(zipFilePath)));
                     DebugLog.AppendLine(ex.Message);
                 }
 
@@ -179,7 +186,7 @@ namespace SpecifiedRecordsExporter
                         }
                     }
 
-                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {fpZipFile}");
+                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFilePath}");
                     string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
                     if (cadFiles.Length > 0)
                     {
@@ -187,12 +194,15 @@ namespace SpecifiedRecordsExporter
                     }
                     else
                     {
-                        Helpers.WaitWhile(() => DeleteFile(fpZipFile), 250, 5000);
+                        Helpers.WaitWhile(() => DeleteFile(zipFilePath), 250, 5000);
                     }
+
+                    UnzipNonCadFilesRecursive(zipDir);
                 }
             }
             DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
         }
+
 
         private void ZipCadFolders(string dwgFolder)
         {
