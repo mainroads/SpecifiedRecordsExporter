@@ -8,6 +8,11 @@ namespace SpecifiedRecordsExporter
         public static readonly string PersonalFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Specified Records Exporter");
         public static Settings Settings { get; private set; }
 
+        public static IEnumerable<string> GetCadFileSearchPatterns()
+        {
+            return Settings.CadFileExtensions.Select(ext => $"*.{ext}");
+        }
+
         public static string SettingsFilePath
         {
             get
