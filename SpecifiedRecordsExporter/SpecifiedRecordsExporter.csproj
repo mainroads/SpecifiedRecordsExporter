@@ -31,17 +31,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
     <CreatePackage>false</CreatePackage>
-    <ApplicationDisplayVersion>0.12.0</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>0.12.1</ApplicationDisplayVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-maccatalyst|AnyCPU'">
     <CreatePackage>false</CreatePackage>
-    <ApplicationDisplayVersion>0.12.0</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>0.12.1</ApplicationDisplayVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
-    <ApplicationDisplayVersion>0.12.0</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>0.12.1</ApplicationDisplayVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
-    <ApplicationDisplayVersion>0.12.0</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>0.12.1</ApplicationDisplayVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- App Icon -->

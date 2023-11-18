@@ -186,10 +186,15 @@ namespace SpecifiedRecordsExporter
                         }
                     }
 
-                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFilePath}");
-                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.AllDirectories);
+                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.TopDirectoryOnly);
+
                     if (cadFiles.Length > 0)
                     {
+                        if (MoveNonCadFilesOutOfDwgFolder(zipDir))
+                        {
+                            Helpers.WaitWhile(() => DeleteFile(zipFilePath), 250, 5000);
+                            ZipManager.Compress(zipDir, zipFilePath);
+                        }
                         Helpers.WaitWhile(() => DeleteFolder(zipDir), 250, 5000);
                     }
                     else
@@ -197,19 +202,23 @@ namespace SpecifiedRecordsExporter
                         Helpers.WaitWhile(() => DeleteFile(zipFilePath), 250, 5000);
                     }
 
-                    UnzipNonCadFilesRecursive(zipDir);
+                    if (Directory.Exists(zipDir))
+                    {
+                        UnzipNonCadFilesRecursive(zipDir);
+                    }
                 }
             }
             DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
         }
 
-
         private void ZipCadFolders(string dwgFolder)
         {
             Progress.ProgressType = ProgressType.ZipCadFiles;
             string[] dwgFiles = Directory.GetFiles(dwgFolder, "*.dwg", SearchOption.TopDirectoryOnly);
+
             if (dwgFiles.Length > 0)
             {
+                MoveNonCadFilesOutOfDwgFolder(dwgFolder); // Move non CAD files before zipping
                 string zipFileName = Path.GetFileName(dwgFolder);
                 if (!Path.GetFileNameWithoutExtension(dwgFolder).Contains("CAD"))
                 {
@@ -230,6 +239,32 @@ namespace SpecifiedRecordsExporter
                 }
             }
         }
+
+
+        private bool MoveNonCadFilesOutOfDwgFolder(string dwgFolder)
+        {
+            bool filesMoved = false;
+            var fileExtensions = SettingsManager.Settings.FileExtensions;
+
+            foreach (var extension in fileExtensions)
+            {
+                string[] files = Directory.GetFiles(dwgFolder, $"*.{extension}", SearchOption.TopDirectoryOnly);
+                if (files.Length > 0)
+                {
+                    string parentFolderPath = Directory.GetParent(dwgFolder).FullName;
+
+                    foreach (string file in files)
+                    {
+                        string destFile = Path.Combine(parentFolderPath, Path.GetFileName(file));
+                        File.Move(file, destFile);
+                        filesMoved = true;
+                    }
+                }
+            }
+
+            return filesMoved;
+        }
+
 
         private void Rename()
         {

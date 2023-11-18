@@ -88,14 +88,17 @@ namespace SpecifiedRecordsExporter
             if (!AppData.IsFilesCopied)
             {
                 await App.Current.MainPage.DisplayAlert(App.Title, "You have not completed Step 1 above!", "OK");
+                AppData.IsIdle = true;
             }
             else if (GetFiles(AppData.RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
             {
                 await App.Current.MainPage.DisplayAlert(App.Title, "Files detected in the Specified Records folder. \n\nPlease remove all the files, and copy only folders!\n\n" + GetFiles(AppData.RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).First().ToString(), "OK");
+                AppData.IsIdle = true;
             }
             else if (string.IsNullOrEmpty(AppData.FreeText))
             {
                 await App.Current.MainPage.DisplayAlert(App.Title, "Free Text is empty!", "OK");
+                AppData.IsIdle = true;
             }
             else
             {
@@ -112,6 +115,7 @@ namespace SpecifiedRecordsExporter
                 finally
                 {
                     SettingsManager.SaveLog(worker.DebugLog);
+                    AppData.IsIdle = true;
                 }
             }
         }
@@ -179,9 +183,7 @@ namespace SpecifiedRecordsExporter
 
                 if (progress.CurrentFileId == worker.MaxFilesCount)
                 {
-
                     AppData.Status = "Rename complete!";
-                    AppData.IsIdle = true;
                 }
             }
         }
