@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:SpecifiedRecordsExporter"
              x:Class="SpecifiedRecordsExporter.MainPage" Title="{Binding AppData.Title}">
+    
     <ContentPage.BindingContext>
         <local:MainPageViewModel />
     </ContentPage.BindingContext>
@@ -26,6 +27,13 @@
                 ValidFilePathTemplate="{StaticResource validFilePathTemplate}" />
         </ResourceDictionary>
     </ContentPage.Resources>
+
+    <!-- Add ToolbarItem for the File menu -->
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}" />
+        <ToolbarItem Text="Open log" Command="{Binding OpenLogCommand}" />
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout Margin="10,0" Spacing="10">
 

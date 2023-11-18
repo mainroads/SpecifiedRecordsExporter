@@ -1,9 +1,13 @@
-﻿using System.ComponentModel;
+﻿using ShareX.HelpersLib;
+using System.ComponentModel;
+using System.Text;
+using System.Windows.Input;
 
 namespace SpecifiedRecordsExporter
 {
     public class MainPageViewModel : ViewModelBase, INotifyPropertyChanged
     {
+        public StringBuilder DebugLog { get; private set; } = new StringBuilder();
         public new event PropertyChangedEventHandler PropertyChanged;
 
         private Worker worker;
@@ -16,22 +20,55 @@ namespace SpecifiedRecordsExporter
             {
                 _appData = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(OpenFolderText)); // Notify that OpenFolderText has changed
             }
         }
 
         public Command PrepareCommand { private set; get; }
+        public ICommand OpenFolderCommand { get; }
+        public ICommand OpenLogCommand { get; }
+
+        public string OpenFolderText
+        {
+            get
+            {
+                var folderName = Path.GetFileName(AppData.RootDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                return string.IsNullOrWhiteSpace(folderName) ? "Open folder" : $"Open {folderName} folder";
+            }
+        }
+
 
         public MainPageViewModel()
         {
             PrepareCommand = new Command(
                 execute: () =>
                 {
-                    Prepare();
-                    RefreshCanExecutes();
+                    try
+                    {
+                        Prepare();
+                        RefreshCanExecutes();
+                    }
+                    catch (Exception ex)
+                    {
+                        DebugLog.AppendLine(ex.Message);
+                    }
                 }, canExecute: () =>
                 {
                     return true;
                 });
+
+            OpenFolderCommand = new Command(OpenFolder);
+            OpenLogCommand = new Command(OpenLog);
+        }
+
+        private void OpenLog()
+        {
+            Helpers.OpenFile(SettingsManager.LogFilePath);
+        }
+
+        public void OpenFolder()
+        {
+            Helpers.OpenFolder(AppData.RootDir);
         }
 
         void RefreshCanExecutes()

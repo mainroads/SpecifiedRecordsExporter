@@ -23,29 +23,15 @@
 
 #endregion License Information (GPL v3)
 
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Resources;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
-using System.Security.Permissions;
-using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 
@@ -339,7 +325,8 @@ namespace ShareX.HelpersLib
                     {
                         ProcessStartInfo psi = new ProcessStartInfo()
                         {
-                            FileName = filePath
+                            FileName = filePath,
+                            UseShellExecute = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                         };
 
                         process.StartInfo = psi;
@@ -378,7 +365,8 @@ namespace ShareX.HelpersLib
                     {
                         ProcessStartInfo psi = new ProcessStartInfo()
                         {
-                            FileName = folderPath
+                            FileName = folderPath,
+                            UseShellExecute = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                         };
 
                         process.StartInfo = psi;
