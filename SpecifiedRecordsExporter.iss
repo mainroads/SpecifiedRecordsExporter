@@ -1,22 +1,8 @@
-[Code]
-function GetVersion: string;
-var
-  VersionString: string;
-  PlusPos: Integer;
-begin
-  VersionString := GetStringFileInfo(MyAppFilePath, 'ProductVersion');
-  PlusPos := Pos('+', VersionString);
-  if PlusPos > 0 then
-    Result := Copy(VersionString, 1, PlusPos - 1)
-  else
-    Result := VersionString;
-end;
-
 #define MyAppDesc "Specified Records Exporter"
 #define MyExeName "SpecifiedRecordsExporter"
 #define MyAppParentDir "SpecifiedRecordsExporter\bin\Release\net8.0-windows10.0.19041.0\win10-x64\publish\"
 #define MyAppFilePath MyAppParentDir + MyExeName + ".exe"
-#define MyAppVersion GetVersion
+#define MyAppVersion GetStringFileInfo(MyAppFilePath, 'FileVersion')
 #define MyAppPublisher "ShareX Team"
 
 [Setup]
@@ -53,7 +39,7 @@ UninstallDisplayIcon={app}\{#MyExeName}
 UsePreviousAppDir=yes
 UsePreviousGroup=yes
 VersionInfoCompany={#MyAppDesc}
-VersionInfoTextVersion={#MyAppVersion}
+;VersionInfoTextVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
 WizardStyle=modern
 
