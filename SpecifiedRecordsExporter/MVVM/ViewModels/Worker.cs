@@ -1,5 +1,6 @@
 ﻿using ShareX.HelpersLib;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SpecifiedRecordsExporter
 {
@@ -34,7 +35,7 @@ namespace SpecifiedRecordsExporter
                 }
 
                 this.rootDir = rootDir;
-                this.freeText = Helpers.GetValidFileName(freeText, ".");
+                this.freeText = Regex.Replace(Helpers.GetValidFileName(freeText, "."), @"\s*-\s*$", "").Trim();
             }
         }
 
@@ -186,11 +187,12 @@ namespace SpecifiedRecordsExporter
                         }
                     }
 
-                    string[] cadFiles = Directory.GetFiles(zipDir, "*.dwg", SearchOption.TopDirectoryOnly);
+                    bool hasCadFiles = SettingsManager.GetCadFileSearchPatterns()
+                        .Any(pattern => Directory.GetFiles(zipDir, pattern, SearchOption.TopDirectoryOnly).Any());
 
-                    if (cadFiles.Length > 0)
+                    if (hasCadFiles)
                     {
-                        if (MoveNonCadFilesOutOfDwgFolder(zipDir))
+                        if (MoveNonCadFilesOutOfCadFolder(zipDir))
                         {
                             Helpers.WaitWhile(() => DeleteFile(zipFilePath), 250, 5000);
                             ZipManager.Compress(zipDir, zipFilePath);
@@ -211,47 +213,46 @@ namespace SpecifiedRecordsExporter
             DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
         }
 
-        private void ZipCadFolders(string dwgFolder)
+        private void ZipCadFolders(string cadFolder)
         {
-            Progress.ProgressType = ProgressType.ZipCadFiles;
-            string[] dwgFiles = Directory.GetFiles(dwgFolder, "*.dwg", SearchOption.TopDirectoryOnly);
+            bool hasCadFiles = SettingsManager.GetCadFileSearchPatterns()
+                .Any(pattern => Directory.GetFiles(cadFolder, pattern, SearchOption.TopDirectoryOnly).Any());
 
-            if (dwgFiles.Length > 0)
+            if (hasCadFiles)
             {
-                MoveNonCadFilesOutOfDwgFolder(dwgFolder); // Move non CAD files before zipping
-                string zipFileName = Path.GetFileName(dwgFolder);
-                if (!Path.GetFileNameWithoutExtension(dwgFolder).Contains("CAD"))
+                MoveNonCadFilesOutOfCadFolder(cadFolder); // Move non-CAD files before zipping
+                string zipFileName = Path.GetFileName(cadFolder);
+                if (!Path.GetFileNameWithoutExtension(cadFolder).Contains("CAD"))
                 {
                     zipFileName += " CAD";
                 }
-                Progress.Status = $"Zipping {dwgFolder}";
+                Progress.Status = $"Zipping {cadFolder}";
                 taskPrepare.Report(Progress);
-                ZipManager.Compress(dwgFolder, Path.Combine(Path.GetDirectoryName(dwgFolder), $"{zipFileName}.zip"));
-                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Zipped {dwgFolder} folder");
-                Helpers.WaitWhile(() => DeleteFolder(dwgFolder), 250, 5000);
+                ZipManager.Compress(cadFolder, Path.Combine(Path.GetDirectoryName(cadFolder), $"{zipFileName}.zip"));
+                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Zipped {cadFolder} folder");
+                Helpers.WaitWhile(() => DeleteFolder(cadFolder), 250, 5000);
             }
             else
             {
-                string[] dwgSubFolders = Directory.GetDirectories(dwgFolder);
-                foreach (string dwgSubFolder in dwgSubFolders)
+                string[] cadSubFolders = Directory.GetDirectories(cadFolder);
+                foreach (string cadSubFolder in cadSubFolders)
                 {
-                    ZipCadFolders(dwgSubFolder);
+                    ZipCadFolders(cadSubFolder);
                 }
             }
         }
 
-
-        private bool MoveNonCadFilesOutOfDwgFolder(string dwgFolder)
+        private bool MoveNonCadFilesOutOfCadFolder(string cadFolder)
         {
             bool filesMoved = false;
-            var fileExtensions = SettingsManager.Settings.FileExtensions;
+            var fileExtensions = SettingsManager.Settings.NonCadFileExtensions;
 
             foreach (var extension in fileExtensions)
             {
-                string[] files = Directory.GetFiles(dwgFolder, $"*.{extension}", SearchOption.TopDirectoryOnly);
+                string[] files = Directory.GetFiles(cadFolder, $"*.{extension}", SearchOption.TopDirectoryOnly);
                 if (files.Length > 0)
                 {
-                    string parentFolderPath = Directory.GetParent(dwgFolder).FullName;
+                    string parentFolderPath = Directory.GetParent(cadFolder).FullName;
 
                     foreach (string file in files)
                     {
