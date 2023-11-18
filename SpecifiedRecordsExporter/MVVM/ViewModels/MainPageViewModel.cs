@@ -51,6 +51,13 @@ namespace SpecifiedRecordsExporter
                     catch (Exception ex)
                     {
                         DebugLog.AppendLine(ex.Message);
+                        DebugLog.AppendLine(ex.StackTrace);
+
+                        if (ex.InnerException != null)
+                        {
+                            DebugLog.AppendLine(ex.InnerException.Message);
+                            DebugLog.AppendLine(ex.InnerException.StackTrace);
+                        }
                     }
                 }, canExecute: () =>
                 {
@@ -87,7 +94,7 @@ namespace SpecifiedRecordsExporter
 
             if (!AppData.IsFilesCopied)
             {
-                await App.Current.MainPage.DisplayAlert(App.Title, "You have not completed Step 1 above!", "OK");
+                await App.Current.MainPage.DisplayAlert(App.Title, "You have not completed Step 2 above!", "OK");
                 AppData.IsIdle = true;
             }
             else if (GetFiles(AppData.RootDir, App.JunkFilesList, SearchOption.TopDirectoryOnly).Count() > 0)
