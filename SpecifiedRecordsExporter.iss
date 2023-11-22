@@ -39,7 +39,7 @@ UninstallDisplayIcon={app}\{#MyExeName}
 UsePreviousAppDir=yes
 UsePreviousGroup=yes
 VersionInfoCompany={#MyAppDesc}
-;VersionInfoTextVersion={#MyAppVersion}
+VersionInfoTextVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
 WizardStyle=modern
 

@@ -1,13 +1,11 @@
 ﻿using ShareX.HelpersLib;
 using System.ComponentModel;
-using System.Text;
 using System.Windows.Input;
 
 namespace SpecifiedRecordsExporter
 {
     public class MainPageViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        public StringBuilder DebugLog { get; private set; } = new StringBuilder();
         public new event PropertyChangedEventHandler PropertyChanged;
 
         private Worker worker;
@@ -50,13 +48,13 @@ namespace SpecifiedRecordsExporter
                     }
                     catch (Exception ex)
                     {
-                        DebugLog.AppendLine(ex.Message);
-                        DebugLog.AppendLine(ex.StackTrace);
+                        App.DebugLog.WriteException(ex);
+                        App.DebugLog.WriteException(ex.StackTrace);
 
                         if (ex.InnerException != null)
                         {
-                            DebugLog.AppendLine(ex.InnerException.Message);
-                            DebugLog.AppendLine(ex.InnerException.StackTrace);
+                            App.DebugLog.WriteException(ex.InnerException.Message);
+                            App.DebugLog.WriteException(ex.InnerException.StackTrace);
                         }
                     }
                 }, canExecute: () =>
@@ -121,7 +119,7 @@ namespace SpecifiedRecordsExporter
                 }
                 finally
                 {
-                    SettingsManager.SaveLog(worker.DebugLog);
+                    SettingsManager.SaveLog();
                     AppData.IsIdle = true;
                 }
             }

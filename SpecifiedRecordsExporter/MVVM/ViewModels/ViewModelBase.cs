@@ -1,12 +1,12 @@
-﻿using System;
+﻿#nullable enable
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace SpecifiedRecordsExporter
 {
-	public abstract class ViewModelBase
-	{
-        public event PropertyChangedEventHandler PropertyChanged;
+    public abstract class ViewModelBase
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
@@ -14,4 +14,3 @@ namespace SpecifiedRecordsExporter
         }
     }
 }
-

@@ -1,9 +1,13 @@
-﻿namespace SpecifiedRecordsExporter;
+﻿using ShareX.HelpersLib;
+
+namespace SpecifiedRecordsExporter;
 
 public partial class App : Application
 {
     public static string Title = "Specified Records Exporter";
     public static string[] JunkFilesList = { ".DS_Store", "TRIMfiles.dat" };
+
+    public static Logger DebugLog { get; private set; } = new Logger();
 
     public App()
     {

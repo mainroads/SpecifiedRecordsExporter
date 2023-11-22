@@ -18,7 +18,6 @@ namespace SpecifiedRecordsExporter
 
         private string rootDir;
         private string freeText;
-        public StringBuilder DebugLog { get; private set; } = new StringBuilder();
 
         public Worker(string rootDir, string freeText)
         {
@@ -86,7 +85,7 @@ namespace SpecifiedRecordsExporter
         {
             if (Directory.Exists(rootDir))
             {
-                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Prepare started.");
+                App.DebugLog.WriteLine($"Prepare started.");
                 RemoveJunkFiles();
                 if (!Progress.HasLongFileNames)
                 {
@@ -102,6 +101,9 @@ namespace SpecifiedRecordsExporter
         private void RemoveJunkFiles()
         {
             string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
+            Progress.Status = $"Analysing {files.Length} files";
+            taskPrepare.Report(Progress);
+
             foreach (string fp in files)
             {
                 if (GetDestPath(fp).Length > 260)
@@ -134,7 +136,7 @@ namespace SpecifiedRecordsExporter
                 if (Progress.IsJunkFile)
                 {
                     Helpers.WaitWhile(() => DeleteFile(fp), 250, 5000);
-                    DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Removed {fp}");
+                    App.DebugLog.WriteLine($"Removed {fp}");
                 }
 
                 taskPrepare.ThrowIfCancellationRequested();
@@ -149,7 +151,7 @@ namespace SpecifiedRecordsExporter
             }
             catch (Exception ex)
             {
-                DebugLog.AppendLine($"Error while unzipping files: {ex.Message}");
+                App.DebugLog.WriteException($"Error while unzipping files: {ex}");
             }
         }
 
@@ -171,7 +173,7 @@ namespace SpecifiedRecordsExporter
                     string corruptedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Corrupted Records";
                     Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
                     File.Move(zipFilePath, Path.Combine(corruptedRecords, Path.GetFileName(zipFilePath)));
-                    DebugLog.AppendLine(ex.Message);
+                    App.DebugLog.WriteException(ex);
                 }
 
                 if (Directory.Exists(zipDir))
@@ -210,7 +212,7 @@ namespace SpecifiedRecordsExporter
                     }
                 }
             }
-            DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Unzipped {zipFiles.Length} non-CAD files");
+            App.DebugLog.WriteLine($"Unzipped {zipFiles.Length} non-CAD files");
         }
 
         private void ZipCadFolders(string cadFolder)
@@ -229,7 +231,7 @@ namespace SpecifiedRecordsExporter
                 Progress.Status = $"Zipping {cadFolder}";
                 taskPrepare.Report(Progress);
                 ZipManager.Compress(cadFolder, Path.Combine(Path.GetDirectoryName(cadFolder), $"{zipFileName}.zip"));
-                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Zipped {cadFolder} folder");
+                App.DebugLog.WriteLine($"Zipped {cadFolder} folder");
                 Helpers.WaitWhile(() => DeleteFolder(cadFolder), 250, 5000);
             }
             else
@@ -295,8 +297,8 @@ namespace SpecifiedRecordsExporter
                 {
                     Helpers.WaitWhile(() => DeleteEmptyFolders(dir), 250, 5000);
                 }
-                DebugLog.AppendLine($"{DateTime.Now.ToString("yyyyMMddTHHmmss")} Renamed {files.Length} files");
-                DebugLog.AppendLine();
+                App.DebugLog.WriteLine($"Renamed {files.Length} files");
+                App.DebugLog.WriteLine("");
             }
         }
 
@@ -331,15 +333,18 @@ namespace SpecifiedRecordsExporter
             string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
             string sfp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
 
-            try
+            if (File.Exists(fp))
             {
-                System.IO.File.Move(fp, sfp);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Error = $"Renaming {fp}";
-                DebugLog.AppendLine(ex.Message);
+                try
+                {
+                    System.IO.File.Move(fp, sfp);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error = $"Renaming {fp}";
+                    App.DebugLog.WriteException(ex);
+                }
             }
 
             return false;
@@ -349,15 +354,18 @@ namespace SpecifiedRecordsExporter
         {
             string destPath = GetDestPath(origPath);
 
-            try
+            if (File.Exists(origPath))
             {
-                System.IO.File.Move(origPath, destPath);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Error = $"Renaming {origPath}";
-                DebugLog.AppendLine(ex.Message);
+                try
+                {
+                    System.IO.File.Move(origPath, destPath);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Error = $"Renaming {origPath}";
+                    App.DebugLog.WriteException(ex);
+                }
             }
 
             return false;

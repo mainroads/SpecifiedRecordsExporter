@@ -1,10 +1,10 @@
 ﻿using ShareX.HelpersLib;
-using System.Text;
 
 namespace SpecifiedRecordsExporter
 {
     public class SettingsManager
     {
+
         public static readonly string PersonalFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Specified Records Exporter");
         public static Settings Settings { get; private set; }
 
@@ -45,10 +45,10 @@ namespace SpecifiedRecordsExporter
 
         }
 
-        public static void SaveLog(StringBuilder log)
+        public static void SaveLog()
         {
             Helpers.CreateDirectoryFromFilePath(LogFilePath);
-            File.AppendAllText(LogFilePath, log.ToString());
+            File.AppendAllText(LogFilePath, App.DebugLog.ToString());
         }
     }
 }
