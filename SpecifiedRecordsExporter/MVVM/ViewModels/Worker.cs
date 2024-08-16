@@ -155,7 +155,7 @@ namespace SpecifiedRecordsExporter
             }
         }
 
-        private void UnzipNonCadFilesRecursive(string directoryPath)
+        private void UnzipNonCadFilesRecursive(string directoryPath, bool isZipInZip = false)
         {
             string[] zipFiles = Directory.GetFiles(directoryPath, "*.zip", SearchOption.AllDirectories);
             foreach (string zipFilePath in zipFiles)
@@ -166,7 +166,7 @@ namespace SpecifiedRecordsExporter
 
                 try
                 {
-                    ZipManager.Extract(zipFilePath, zipDir);
+                    ZipManager.Extract(zipFilePath, zipDir, retainDirectoryStructure: !isZipInZip);
                 }
                 catch (Exception ex)
                 {
@@ -208,7 +208,7 @@ namespace SpecifiedRecordsExporter
 
                     if (Directory.Exists(zipDir))
                     {
-                        UnzipNonCadFilesRecursive(zipDir);
+                        UnzipNonCadFilesRecursive(zipDir, isZipInZip: true);
                     }
                 }
             }
