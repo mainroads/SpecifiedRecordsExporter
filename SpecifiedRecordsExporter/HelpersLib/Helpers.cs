@@ -464,7 +464,8 @@ namespace ShareX.HelpersLib
                 do
                 {
                     number++;
-                    string newFileName = $"{fileName} ({number}){fileExtension}";
+                    string paddedNumber = number.ToString("D2");
+                    string newFileName = $"{fileName} ({paddedNumber}){fileExtension}";
                     filePath = Path.Combine(folderPath, newFileName);
                 }
                 while (File.Exists(filePath));
