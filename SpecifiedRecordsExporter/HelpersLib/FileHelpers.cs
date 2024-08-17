@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.VisualBasic.FileIO;
+﻿using System.Text.RegularExpressions;
 
 namespace ShareX.HelpersLib
 {
@@ -66,6 +62,29 @@ namespace ShareX.HelpersLib
             return false;
         }
 
+        public static string GetCleanFileName(string fileName)
+        {
+            // Separate the file name from its extension
+            string nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            string extension = Path.GetExtension(fileName);
+
+            // Remove percentage encodings from the file name
+            nameWithoutExtension = Uri.UnescapeDataString(nameWithoutExtension);
+
+            // Replace multiple spaces with a single space
+            nameWithoutExtension = Regex.Replace(nameWithoutExtension, @"\s+", " ");
+
+            // Remove or replace special characters in the file name
+            nameWithoutExtension = Regex.Replace(nameWithoutExtension, @"[^a-zA-Z0-9\s\-()]", "_");
+
+            // Trim excessive underscores and dashes
+            nameWithoutExtension = Regex.Replace(nameWithoutExtension, @"[_-]{2,}", "_");
+            nameWithoutExtension = nameWithoutExtension.Trim('_', '-');
+
+            // Return the cleaned file name with its original extension
+            return nameWithoutExtension + extension;
+        }
+
         public static bool IsImageFile(string filePath)
         {
             return CheckExtension(filePath, ImageFileExtensions);
@@ -119,7 +138,7 @@ namespace ShareX.HelpersLib
                 {
                     if (sendToRecycleBin)
                     {
-                      // TODO FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        // TODO FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                     }
                     else
                     {
