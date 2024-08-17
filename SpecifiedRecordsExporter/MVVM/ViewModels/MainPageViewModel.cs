@@ -73,6 +73,7 @@ namespace SpecifiedRecordsExporter
 
         public void OpenFolder()
         {
+            Helpers.CreateDirectoryFromDirectoryPath(AppData.RootDir);
             Helpers.OpenFolder(AppData.RootDir);
         }
 

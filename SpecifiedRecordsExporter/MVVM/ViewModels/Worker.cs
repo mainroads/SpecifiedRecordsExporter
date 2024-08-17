@@ -55,15 +55,37 @@ namespace SpecifiedRecordsExporter
 
         private string GetDestPath(string origPath)
         {
+            // Split the original path based on rootDir and construct the new file name
             string path2 = origPath.Split(rootDir)[1];
             StringBuilder fn = new StringBuilder();
+
             if (!string.IsNullOrEmpty(freeText))
             {
                 fn.Append(freeText + " - ");
             }
             fn.Append(path2.Replace(Path.DirectorySeparatorChar.ToString(), " - "));
-            return Path.Combine(rootDir, fn.ToString());
+
+            // Combine the rootDir and the new file name to get the full path
+            string fp = Path.Combine(rootDir, fn.ToString());
+
+            // Adjust the file name if it exceeds 260 characters
+            if (fp.Length > 260)
+            {
+                int diff = fp.Length - 260;
+                string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
+                fp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
+            }
+
+            // Return a unique file path
+            return Helpers.GetUniqueFilePath(
+                Path.Combine(
+                    Path.GetDirectoryName(fp),
+                    FileHelpers.GetCleanFileName(Path.GetFileName(fp))
+                )
+            );
+
         }
+
 
         private bool IsJunkFile(string origPath)
         {
@@ -87,11 +109,8 @@ namespace SpecifiedRecordsExporter
             {
                 App.DebugLog.WriteLine($"Prepare started.");
                 RemoveJunkFiles();
-                if (!Progress.HasLongFileNames)
-                {
-                    UnzipNonCadFiles();
-                    ZipCadFolders(rootDir);
-                }
+                UnzipNonCadFiles();
+                ZipCadFolders(rootDir);
 
                 Progress.ProgressType = ProgressType.ReadyToRename;
                 taskPrepare.Report(Progress);
@@ -103,15 +122,6 @@ namespace SpecifiedRecordsExporter
             string[] files = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
             Progress.Status = $"Analysing {files.Length} files";
             taskPrepare.Report(Progress);
-
-            foreach (string fp in files)
-            {
-                if (GetDestPath(fp).Length > 260)
-                {
-                    Helpers.WaitWhile(() => ShortenFilePath(fp), 250, 5000);
-                    Progress.HasLongFileNames = true;
-                }
-            }
 
             string[] filesValid = Directory.GetFiles(rootDir, "*.*", SearchOption.AllDirectories);
             MaxFilesCount = filesValid.Length;
@@ -128,7 +138,7 @@ namespace SpecifiedRecordsExporter
                 else
                 {
                     Progress.ProgressType = ProgressType.PreviewFileNames;
-                    Progress.CurrentFilePath = GetDestPath(fp);
+                    Progress.CurrentFilePath = fp;
                 }
 
                 taskPrepare.Report(Progress);
@@ -145,17 +155,27 @@ namespace SpecifiedRecordsExporter
 
         public void UnzipNonCadFiles()
         {
-            try
+            int zipFileCount = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories).Length;
+
+            // Continue processing while there are zip files in the rootDir
+            while (zipFileCount > 0)
             {
-                UnzipNonCadFilesRecursive(rootDir);
-            }
-            catch (Exception ex)
-            {
-                App.DebugLog.WriteException($"Error while unzipping files: {ex}");
+                try
+                {
+                    // Process the zip files in rootDir
+                    UnzipNonCadFilesRecursive(rootDir);
+                }
+                catch (Exception ex)
+                {
+                    App.DebugLog.WriteException($"Error while unzipping files in {rootDir}: {ex}");
+                }
+
+                // Recalculate the number of zip files after each iteration
+                zipFileCount = Directory.GetFiles(rootDir, "*.zip", SearchOption.AllDirectories).Length;
             }
         }
 
-        private void UnzipNonCadFilesRecursive(string directoryPath, bool isZipInZip = false)
+        private void UnzipNonCadFilesRecursive(string directoryPath)
         {
             string[] zipFiles = Directory.GetFiles(directoryPath, "*.zip", SearchOption.AllDirectories);
             foreach (string zipFilePath in zipFiles)
@@ -166,27 +186,63 @@ namespace SpecifiedRecordsExporter
 
                 try
                 {
-                    ZipManager.Extract(zipFilePath, zipDir, retainDirectoryStructure: !isZipInZip);
+                    // Determine extraction path and options based on zipFilePath length
+                    if (zipFilePath.Length > 200)
+                    {
+                        // Attempt 1: Try with rootDir and overwrite set to true
+                        ZipManager.Extract(zipFilePath, rootDir, true);
+                    }
+                    else
+                    {
+                        // Attempt 1: Try with zipDir and overwrite set to true
+                        ZipManager.Extract(zipFilePath, zipDir, true);
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception ex1)
                 {
-                    string corruptedRecords = $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}{Path.DirectorySeparatorChar}Downloads{Path.DirectorySeparatorChar}Corrupted Records";
-                    Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
-                    File.Move(zipFilePath, Path.Combine(corruptedRecords, Path.GetFileName(zipFilePath)));
-                    App.DebugLog.WriteException(ex);
+                    App.DebugLog.WriteLine(zipFilePath);
+                    App.DebugLog.WriteLine("Failed Attempt 1: First extraction attempt failed.");
+                    App.DebugLog.WriteException(ex1);
+
+                    try
+                    {
+                        // Determine second extraction path and options based on zipFilePath length
+                        if (zipFilePath.Length > 200)
+                        {
+                            // Attempt 2: Try with rootDir and overwrite set to false
+                            ZipManager.Extract(zipFilePath, rootDir, false);
+                        }
+                        else
+                        {
+                            // Attempt 2: Try with zipDir and overwrite set to false
+                            ZipManager.Extract(zipFilePath, zipDir, false);
+                        }
+                    }
+                    catch (Exception ex2)
+                    {
+                        App.DebugLog.WriteLine("Failed Attempt 2: Second extraction attempt failed.");
+                        App.DebugLog.WriteException(ex2);
+
+                        // Move the file to "Corrupted Records" directory if all attempts fail
+                        string corruptedRecords = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Corrupted Records");
+                        Helpers.CreateDirectoryFromDirectoryPath(corruptedRecords);
+                        App.DebugLog.WriteLine($"Moved {zipFilePath} to {corruptedRecords}");
+                        File.Move(zipFilePath, Path.Combine(corruptedRecords, Path.GetFileName(zipFilePath)));
+                    }
                 }
 
                 if (Directory.Exists(zipDir))
                 {
-                    string[] longFileNames = Directory.GetFiles(zipDir, "*.*", SearchOption.AllDirectories);
-                    foreach (string fp in longFileNames)
+                    // Check for any zip files within this directory
+                    string[] innerZipFiles = Directory.GetFiles(zipDir, "*.zip", SearchOption.AllDirectories);
+                    if (innerZipFiles.Length > 0)
                     {
-                        if (GetDestPath(fp).Length > 260)
+                        foreach (string innerZipFile in innerZipFiles)
                         {
-                            Helpers.WaitWhile(() => ShortenFilePath(fp), 250, 5000);
-                            Progress.HasLongFileNames = true;
-                            break;
+                            string destinationPath = Path.Combine(rootDir, Path.GetFileName(innerZipFile));
+                            File.Move(innerZipFile, destinationPath);
                         }
+                        App.DebugLog.WriteLine($"Moved {innerZipFiles.Length} nested zip files to {rootDir} for later processing.");
                     }
 
                     bool hasCadFiles = SettingsManager.GetCadFileSearchPatterns()
@@ -208,11 +264,15 @@ namespace SpecifiedRecordsExporter
 
                     if (Directory.Exists(zipDir))
                     {
-                        UnzipNonCadFilesRecursive(zipDir, isZipInZip: true);
+                        UnzipNonCadFilesRecursive(zipDir);
                     }
                 }
             }
-            App.DebugLog.WriteLine($"Unzipped {zipFiles.Length} non-CAD files");
+
+            if (zipFiles.Length > 0)
+            {
+                App.DebugLog.WriteLine($"Unzipped {zipFiles.Length} non-CAD files in {directoryPath}");
+            }
         }
 
         private void ZipCadFolders(string cadFolder)
@@ -282,14 +342,22 @@ namespace SpecifiedRecordsExporter
 
                 foreach (string fp in files)
                 {
-                    if (Helpers.WaitWhile(() => RenameFile(fp), 250, 5000))
+                    try
                     {
-                        Progress.CurrentFilePath = fp;
-                        Progress.CurrentFileId++;
-                        taskPrepare.Report(Progress);
-                    }
+                        if (Helpers.WaitWhile(() => RenameFile(fp), 250, 5000))
+                        {
+                            Progress.CurrentFilePath = fp;
+                            Progress.CurrentFileId++;
+                            taskPrepare.Report(Progress);
+                        }
 
-                    taskPrepare.ThrowIfCancellationRequested();
+                        taskPrepare.ThrowIfCancellationRequested();
+                    }
+                    catch (Exception ex)
+                    {
+                        App.DebugLog.WriteLine(fp);
+                        App.DebugLog.WriteException(ex);
+                    }
                 }
 
                 string[] dirs = Directory.GetDirectories(rootDir);
@@ -318,36 +386,13 @@ namespace SpecifiedRecordsExporter
         {
             try
             {
-                System.IO.File.Delete(fp);
+                File.Delete(fp);
                 return true;
             }
             catch
             {
                 return false;
             }
-        }
-
-        private bool ShortenFilePath(string fp)
-        {
-            int diff = GetDestPath(fp).Length - 260;
-            string sfn = Path.GetFileNameWithoutExtension(fp).Substring(0, Path.GetFileNameWithoutExtension(fp).Length - diff);
-            string sfp = Path.Combine(Path.GetDirectoryName(fp), sfn) + Path.GetExtension(fp);
-
-            if (File.Exists(fp))
-            {
-                try
-                {
-                    System.IO.File.Move(fp, sfp);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Error = $"Renaming {fp}";
-                    App.DebugLog.WriteException(ex);
-                }
-            }
-
-            return false;
         }
 
         private bool RenameFile(string origPath)
@@ -358,12 +403,14 @@ namespace SpecifiedRecordsExporter
             {
                 try
                 {
-                    System.IO.File.Move(origPath, destPath);
+                    File.Move(origPath, destPath);
                     return true;
                 }
                 catch (Exception ex)
                 {
                     Error = $"Renaming {origPath}";
+                    App.DebugLog.WriteLine($"origPath: {origPath}");
+                    App.DebugLog.WriteLine($"destPath: {destPath}");
                     App.DebugLog.WriteException(ex);
                 }
             }
