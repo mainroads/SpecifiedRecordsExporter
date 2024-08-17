@@ -26,7 +26,7 @@ namespace SpecifiedRecordsExporter
             get
             {
                 string logsFolder = Path.Combine(PersonalFolder, "Logs");
-                string filename = string.Format("SRE-Log-{0:yyyy-MM}.log", DateTime.Now);
+                string filename = string.Format("SRE-Log-{0:yyyy-MM-dd}.log", DateTime.Now);
                 return Path.Combine(logsFolder, filename);
             }
         }
