@@ -15,4 +15,6 @@ The script is interactive and will prompt for:
 
 It removes junk files, extracts non-CAD zip archives, recompresses folders that contain
 CAD files, renames all files based on their folder path and places them in the root
-folder, and finally deletes empty directories.
+folder, and finally deletes empty directories. The script mirrors the business logic
+from the application's `Worker.cs` including retry loops for file operations, path
+length checks when extracting archives and the same CAD/non-CAD handling rules.

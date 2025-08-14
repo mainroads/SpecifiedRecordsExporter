@@ -13,6 +13,28 @@ $NonCadFileExtensions = @('pdf', 'docx')
 $CadFileExtensions = @('dwg', 'shp', 'sor')
 $CadPatterns = $CadFileExtensions | ForEach-Object { "*.${_}" }
 
+function Get-CleanFileName {
+    param([string]$Name)
+    $invalid = [IO.Path]::GetInvalidFileNameChars()
+    return -join ($Name.ToCharArray() | ForEach-Object { if ($invalid -contains $_) { '_' } else { $_ } })
+}
+
+function Invoke-WithRetry {
+    param(
+        [scriptblock]$Action,
+        [int]$IntervalMs = 250,
+        [int]$TimeoutMs = 5000
+    )
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    while ($sw.ElapsedMilliseconds -lt $TimeoutMs) {
+        try {
+            if (& $Action) { return $true }
+        } catch {}
+        Start-Sleep -Milliseconds $IntervalMs
+    }
+    return $false
+}
+
 function Get-UniqueFilePath {
     param([string]$Path)
     $dir = [IO.Path]::GetDirectoryName($Path)
@@ -37,7 +59,7 @@ function Get-DestPath {
     $relative = $relative -replace [regex]::Escape([IO.Path]::DirectorySeparatorChar), ' - '
     if ($FreeText) { $newName = "$FreeText - $relative" } else { $newName = $relative }
     $newName = $newName -replace '\s*-\s*$', ''
-    $destPath = Join-Path $RootDir $newName
+    $destPath = Join-Path $RootDir (Get-CleanFileName $newName)
     if ($destPath.Length -gt 260) {
         $diff = $destPath.Length - 260
         $base = [IO.Path]::GetFileNameWithoutExtension($destPath)
@@ -45,6 +67,8 @@ function Get-DestPath {
         $base = $base.Substring(0, [Math]::Max(0, $base.Length - $diff))
         $destPath = Join-Path ([IO.Path]::GetDirectoryName($destPath)) ($base + $ext)
     }
+    $file = Get-CleanFileName ([IO.Path]::GetFileName($destPath))
+    $destPath = Join-Path ([IO.Path]::GetDirectoryName($destPath)) $file
     return Get-UniqueFilePath $destPath
 }
 
@@ -54,7 +78,7 @@ function Remove-JunkFiles {
     foreach ($file in $files) {
         if ($JunkFilesList -contains $file.Name -or $JunkFilesList -contains $file.Extension) {
             Write-Host "Removing $($file.FullName)" -ForegroundColor Yellow
-            Remove-Item -LiteralPath $file.FullName -Force
+            Invoke-WithRetry { Remove-Item -LiteralPath $file.FullName -Force; return $true } | Out-Null
         } else {
             Write-Host "Preview: $($file.FullName)"
         }
@@ -80,43 +104,46 @@ function Unzip-NonCadFiles {
     while ((Get-ChildItem -Path $RootDir -Filter '*.zip' -Recurse -File).Count -gt 0) {
         foreach ($zip in Get-ChildItem -Path $RootDir -Filter '*.zip' -Recurse -File) {
             $zipDir = Join-Path $zip.DirectoryName $($zip.BaseName)
+            $destination = if ($zip.FullName.Length -gt 200) { $RootDir } else { $zipDir }
+            $extracted = $true
             try {
-                Expand-Archive -Path $zip.FullName -DestinationPath $zipDir -Force
+                Expand-Archive -Path $zip.FullName -DestinationPath $destination -Force
             } catch {
                 try {
-                    Expand-Archive -Path $zip.FullName -DestinationPath $RootDir -Force
+                    Expand-Archive -Path $zip.FullName -DestinationPath $destination
                 } catch {
-                    try {
-                        Expand-Archive -Path $zip.FullName -DestinationPath $RootDir
-                    } catch {
-                        $corrupted = Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Downloads/Corrupted Records'
-                        New-Item -ItemType Directory -Path $corrupted -Force | Out-Null
-                        Move-Item -LiteralPath $zip.FullName -Destination (Join-Path $corrupted $zip.Name) -Force
-                        continue
+                    $corrupted = Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Downloads/Corrupted Records'
+                    New-Item -ItemType Directory -Path $corrupted -Force | Out-Null
+                    Move-Item -LiteralPath $zip.FullName -Destination (Join-Path $corrupted $zip.Name) -Force
+                    $extracted = $false
+                }
+            }
+            if (-not $extracted) { continue }
+            if (Test-Path -LiteralPath $zipDir) {
+                $innerZips = Get-ChildItem -Path $zipDir -Filter '*.zip' -Recurse -File -ErrorAction SilentlyContinue
+                foreach ($inner in $innerZips) {
+                    Move-Item -LiteralPath $inner.FullName -Destination (Join-Path $RootDir $inner.Name) -Force
+                }
+                $hasCad = $false
+                foreach ($pattern in $CadPatterns) {
+                    if (Get-ChildItem -Path $zipDir -Filter $pattern -Recurse -ErrorAction SilentlyContinue) {
+                        $hasCad = $true; break
                     }
                 }
-            }
-            $innerZips = Get-ChildItem -Path $zipDir -Filter '*.zip' -Recurse -File -ErrorAction SilentlyContinue
-            foreach ($inner in $innerZips) {
-                Move-Item -LiteralPath $inner.FullName -Destination (Join-Path $RootDir $inner.Name) -Force
-            }
-            $hasCad = $false
-            foreach ($pattern in $CadPatterns) {
-                if (Get-ChildItem -Path $zipDir -Filter $pattern -Recurse -ErrorAction SilentlyContinue) {
-                    $hasCad = $true; break
+                if ($hasCad) {
+                    if (Move-NonCadFilesOutOfCadFolder $zipDir) {
+                        Invoke-WithRetry { Remove-Item -LiteralPath $zip.FullName -Force; return $true } | Out-Null
+                        Compress-Archive -Path $zipDir -DestinationPath $zip.FullName -Force
+                    }
+                    Invoke-WithRetry { Remove-Item -Path $zipDir -Recurse -Force; return $true } | Out-Null
+                } else {
+                    Invoke-WithRetry { Remove-Item -LiteralPath $zip.FullName -Force; return $true } | Out-Null
                 }
-            }
-            if ($hasCad) {
-                if (Move-NonCadFilesOutOfCadFolder $zipDir) {
-                    Remove-Item -LiteralPath $zip.FullName -Force -ErrorAction SilentlyContinue
-                    Compress-Archive -Path $zipDir -DestinationPath $zip.FullName -Force
+                if (Test-Path -LiteralPath $zipDir) {
+                    Unzip-NonCadFiles $zipDir
                 }
-                Remove-Item -Path $zipDir -Recurse -Force
             } else {
-                Remove-Item -LiteralPath $zip.FullName -Force
-            }
-            if (Test-Path -LiteralPath $zipDir) {
-                Unzip-NonCadFiles $zipDir
+                Invoke-WithRetry { Remove-Item -LiteralPath $zip.FullName -Force; return $true } | Out-Null
             }
         }
     }
@@ -137,7 +164,7 @@ function Zip-CadFolders {
         $zipPath = Join-Path (Split-Path $Folder -Parent) ("$zipName.zip")
         Write-Host "Zipping $Folder" -ForegroundColor Cyan
         Compress-Archive -Path $Folder -DestinationPath $zipPath -Force
-        Remove-Item -Path $Folder -Recurse -Force
+        Invoke-WithRetry { Remove-Item -Path $Folder -Recurse -Force; return $true } | Out-Null
     } else {
         foreach ($sub in Get-ChildItem -Path $Folder -Directory) {
             Zip-CadFolders $sub.FullName
@@ -152,9 +179,7 @@ function Rename-Files {
     $i = 0
     foreach ($file in $files) {
         $dest = Get-DestPath -OriginalPath $file.FullName -RootDir $RootDir -FreeText $FreeText
-        try {
-            Move-Item -LiteralPath $file.FullName -Destination $dest -Force
-        } catch {
+        if (-not (Invoke-WithRetry { Move-Item -LiteralPath $file.FullName -Destination $dest -Force; return $true })) {
             Write-Warning "Failed to rename $($file.FullName)"
         }
         $i++
@@ -167,7 +192,7 @@ function Remove-EmptyFolders {
     foreach ($dir in Get-ChildItem -Path $RootDir -Directory) {
         Remove-EmptyFolders $dir.FullName
         if (-not (Get-ChildItem -Path $dir.FullName)) {
-            Remove-Item -Path $dir.FullName -Force
+            Invoke-WithRetry { Remove-Item -Path $dir.FullName -Force; return $true } | Out-Null
         }
     }
 }
@@ -193,5 +218,5 @@ function Prepare-And-Rename {
 # Interactive execution
 $root = Read-Host 'Enter the root directory path'
 $freeText = Read-Host 'Enter free text for renamed files (optional)'
+if ($freeText) { $freeText = (Get-CleanFileName $freeText) -replace '\s*-\s*$', '' }
 Prepare-And-Rename -RootDir $root -FreeText $freeText
-
