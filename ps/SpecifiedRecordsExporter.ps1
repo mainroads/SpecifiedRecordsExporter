@@ -220,4 +220,3 @@ $root = Read-Host 'Enter the root directory path'
 $freeText = Read-Host 'Enter free text for renamed files (optional)'
 if ($freeText) { $freeText = (Get-CleanFileName $freeText) -replace '\s*-\s*$', '' }
 Prepare-And-Rename -RootDir $root -FreeText $freeText
-
